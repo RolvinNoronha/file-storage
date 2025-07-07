@@ -3,5 +3,6 @@ package user
 import "github.com/RolvinNoronha/fileupload-backend/pkg/models"
 
 type Repository interface {
-	CreateUser(models.User) (int, error);
+	CreateUser(models.User) (uint, error);
+	GetUserByUsername(string) (error);
 }

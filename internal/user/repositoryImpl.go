@@ -1,24 +1,35 @@
 package user
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/RolvinNoronha/fileupload-backend/pkg/models"
 	"gorm.io/gorm"
 )
 
-type RepositoryImpl struct {
+type repositoryImpl struct {
 	db *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) *RepositoryImpl {
-	return &RepositoryImpl{db:db};
+func NewRepository(db *gorm.DB) Repository {
+	return &repositoryImpl{db: db};
 }
 
-func (r *RepositoryImpl) CreateUser(user models.User) (int, error) {
-	userId := r.db.Create(user);
+func (r *repositoryImpl) CreateUser(user models.User) (uint, error) {
+	r.db.Create(&user);
+	result := r.db.Create(user);
 
-	fmt.Print(userId);
+	return user.ID, result.Error;
+}
 
-	return 2, nil
+func (r *repositoryImpl) GetUserByUsername(email string) (error) {
+	var user models.User;
+	tx := r.db.Where("username = ?", email)
+	result := tx.First(&user);
+
+	if (errors.Is(result.Error, gorm.ErrRecordNotFound)) {
+		return result.Error;
+	}
+
+	return nil;
 }

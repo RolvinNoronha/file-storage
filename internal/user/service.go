@@ -13,6 +13,7 @@ func NewService(repo Repository) *Service {
 	}
 }
 
-func (s *Service) CreateUser(user models.User) (int, error) {
+func (s *Service) CreateUser(user models.User) (uint, error) {
 	return s.repo.CreateUser(user);
 }
+

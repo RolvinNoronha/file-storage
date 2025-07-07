@@ -1,8 +1,9 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/RolvinNoronha/fileupload-backend/internal/db"
 	"github.com/RolvinNoronha/fileupload-backend/internal/env"
@@ -17,9 +18,11 @@ func main() {
 		log.Fatal(err);
 	}
 
+	port := os.Getenv("PORT")
 	cfg := config{
-		addr: ":8080",
+		addr: fmt.Sprintf(":%s", port),
 		db: db,
+		jwtSecret: []byte(os.Getenv("JWT_SECRET")),
 	}
 
 	app := &application{

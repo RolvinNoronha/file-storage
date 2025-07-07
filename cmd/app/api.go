@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/RolvinNoronha/fileupload-backend/internal/routes"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -15,21 +17,32 @@ type application struct {
 type config struct {
 	addr string
 	db *gorm.DB
+	jwtSecret []byte
 }
 
-func (app *application) mount() *http.ServeMux {
+func (app *application) mount() *gin.Engine {
+
+	router := routes.NewRouter(app.config.db);
+	return router;
+
+	/*
 	mux := http.NewServeMux()
-	mux.HandleFunc("/ser", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("ok"))
-	})
+	userRepo := user.NewRepository(app.config.db);
+	userService := user.NewService(userRepo);
+	userHandler := user.NewHandler(userService);
+
+	mux.HandleFunc("POST /register", userHandler.CreateUser);
+	mux.HandleFunc("/protected", userHandler.Protected);
+	mux.HandleFunc("/refresh", userHandler.Refresh);
 
 	return mux
+	*/
 }
 
-func (app *application) run(mux *http.ServeMux) error {
+func (app *application) run(router *gin.Engine) error {
 	srv := &http.Server{
 		Addr:         app.config.addr,
-		Handler:      mux,
+		Handler:      router,
 		ReadTimeout:  time.Second * 10,
 		WriteTimeout: time.Second * 30,
 		IdleTimeout:  time.Minute,
