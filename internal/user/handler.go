@@ -1,11 +1,10 @@
 package user
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/RolvinNoronha/fileupload-backend/pkg/models"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
@@ -17,56 +16,48 @@ func NewHandler(service *Service) (*Handler) {
 		service: service,
 	}
 }
-func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+
+func (h *Handler) CreateUser(c *gin.Context) {
 	var authRequest models.AuthRequest;
 
-	reqerr := json.NewDecoder(r.Body).Decode(&authRequest);
-	if (reqerr != nil) {
-		w.WriteHeader(http.StatusBadRequest);
-		json.NewEncoder(w).Encode(map[string]string{"message": "missing required fields!"})
-		return;
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(authRequest.Password), bcrypt.DefaultCost)
-
-	if (err != nil) {
-		w.WriteHeader(http.StatusInternalServerError);
-		json.NewEncoder(w).Encode(map[string]string{"message": "could not hash password!"})
+	if err := c.ShouldBindJSON(&authRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()});
 		return;
 	}
 
 	user := models.User{
 		Username: authRequest.Username,
-		Password: string(hashedPassword),
+		Password: authRequest.Password,
 	}
-
-	dberr := h.service.repo.GetUserByUsername(user.Username);
-
-	if (dberr != nil) {
-		w.WriteHeader(http.StatusConflict);
-		json.NewEncoder(w).Encode(map[string]string{"message": "username already exists!"})
-		return;
-	}
-
-
-	userId, err := h.service.repo.CreateUser(user);
+	 
+	err := h.service.CreateUser(user);
 
 	if (err != nil) {
-		w.WriteHeader(http.StatusInternalServerError);
-		json.NewEncoder(w).Encode(map[string]string{"message": "failed to add user!"})
+		c.JSON(err.StatusCode, gin.H{"error": err.Message})	
 		return;
 	}
 
-	w.WriteHeader(http.StatusCreated);
-	json.NewEncoder(w).Encode(map[string]uint{"userId": userId});
+	c.JSON(http.StatusCreated, gin.H{"message": "successfully created user"});
 }
 
+func (h *Handler) Login(c *gin.Context) {
+	var loginRequest models.AuthRequest;
+	if err := c.ShouldBindJSON(&loginRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()});
+		return;
+	}
+
+	token, err := h.service.LoginUser(loginRequest);
+	if (err != nil) {
+		c.JSON(err.StatusCode, gin.H{"error": err.Message});
+		return;
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token});
+}
  
 func (h *Handler) Protected(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK);
 }
 
 
-func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK);
-}

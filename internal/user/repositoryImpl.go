@@ -15,21 +15,21 @@ func NewRepository(db *gorm.DB) Repository {
 	return &repositoryImpl{db: db};
 }
 
-func (r *repositoryImpl) CreateUser(user models.User) (uint, error) {
+func (r *repositoryImpl) CreateUser(user models.User) (error) {
 	r.db.Create(&user);
 	result := r.db.Create(user);
 
-	return user.ID, result.Error;
+	return result.Error;
 }
 
-func (r *repositoryImpl) GetUserByUsername(email string) (error) {
+func (r *repositoryImpl) GetUserByUsername(username string) (models.User, error) {
 	var user models.User;
-	tx := r.db.Where("username = ?", email)
+	tx := r.db.Where("username = ?", username)
 	result := tx.First(&user);
 
 	if (errors.Is(result.Error, gorm.ErrRecordNotFound)) {
-		return result.Error;
+		return user, result.Error;
 	}
 
-	return nil;
+	return user, nil;
 }

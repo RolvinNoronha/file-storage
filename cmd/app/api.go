@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/RolvinNoronha/fileupload-backend/internal/routes"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -17,10 +16,9 @@ type application struct {
 type config struct {
 	addr string
 	db *gorm.DB
-	jwtSecret []byte
 }
 
-func (app *application) mount() *gin.Engine {
+func (app *application) mount() http.Handler {
 
 	router := routes.NewRouter(app.config.db);
 	return router;
@@ -39,7 +37,7 @@ func (app *application) mount() *gin.Engine {
 	*/
 }
 
-func (app *application) run(router *gin.Engine) error {
+func (app *application) run(router http.Handler) error {
 	srv := &http.Server{
 		Addr:         app.config.addr,
 		Handler:      router,
