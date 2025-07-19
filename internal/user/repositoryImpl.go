@@ -16,7 +16,6 @@ func NewRepository(db *gorm.DB) Repository {
 }
 
 func (r *repositoryImpl) CreateUser(user models.User) (error) {
-	r.db.Create(&user);
 	result := r.db.Create(user);
 
 	return result.Error;

@@ -9,3 +9,8 @@ type Folder struct {
 	User   User   `gorm:"foreignKey:UserID"`
 	Files  []File `gorm:"foreignKey:FolderID"`
 }
+
+type CreateFolderRequest struct {
+	UserID string `json:"userId"`
+    FolderName string `json:"folderName"`
+}

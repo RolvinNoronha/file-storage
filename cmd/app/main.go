@@ -7,7 +7,6 @@ import (
 
 	"github.com/RolvinNoronha/fileupload-backend/internal/db"
 	"github.com/RolvinNoronha/fileupload-backend/internal/env"
-	// "net/http"
 )
 
 func main() {
@@ -22,7 +21,6 @@ func main() {
 	cfg := config{
 		addr: fmt.Sprintf(":%s", port),
 		db: db,
-		jwtSecret: []byte(os.Getenv("JWT_SECRET")),
 	}
 
 	app := &application{

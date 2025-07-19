@@ -12,3 +12,12 @@ type File struct {
 	FolderID *uint    `gorm:"index"` 
 	Folder   Folder   `gorm:"foreignKey:FolderID"` 
 }
+
+type CreateFileRequest struct {
+	FileName string `json:"fileName"`
+	FilePath string `json:"filePath"`
+	FileType string `json:"fileType"`
+	FileSize uint   `json:"fileSize"`
+	UserID   uint   `json:"userId"`
+	FolderID uint   `json:"folderId"`
+}
