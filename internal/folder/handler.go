@@ -35,14 +35,32 @@ func (h *Handler) CreateFolder(c *gin.Context) {
 	folder := models.Folder{
 		UserID: uint(id),
 		Name: folderDetails.FolderName,
-		File: [],
 	}
 
-	err := h.service.CreateFolder(folder);
-	if (err != nil) {
-		c.JSON(err.StatusCode, gin.H{"error": err.Message});
+	er := h.service.CreateFolder(folder);
+	if (er != nil) {
+		c.JSON(er.StatusCode, gin.H{"error": er.Message});
 		return;
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully created folder"});
 }
+
+func (h *Handler) GetFoldersByUserID(c *gin.Context) {
+	var getFoldersRequest *models.GetFolderByUserIDRequest;	
+
+	if err := c.ShouldBindJSON(&getFoldersRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()});
+		return;
+	}
+
+	folders, err := h.service.GetFolderByUserID(uint(getFoldersRequest.UserID));
+
+	if (err != nil) {
+		c.JSON(err.StatusCode, gin.H{"error": err.Message});
+		return;
+	}
+
+	c.JSON(http.StatusOK, gin.H{"folders": folders});
+}
+

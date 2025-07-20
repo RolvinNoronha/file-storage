@@ -38,6 +38,8 @@ func NewRouter(db *gorm.DB) http.Handler {
 		fileHandler := file.NewHandler(fileService);
 
 		fileRoutes.POST("/create", fileHandler.CreateFile);
+		fileRoutes.GET("/files", fileHandler.GetFileByUserID);
+		fileRoutes.GET("/filesbyfolder", fileHandler.GetFileByFolderID);
 	}
 
 
@@ -49,6 +51,7 @@ func NewRouter(db *gorm.DB) http.Handler {
 		folderHandler := folder.NewHandler(folderService);
 
 		folderRoutes.POST("/create", folderHandler.CreateFolder);
+		folderRoutes.GET("/folders", folderHandler.GetFoldersByUserID);
 	}
 
 

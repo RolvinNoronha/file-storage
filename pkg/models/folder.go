@@ -14,3 +14,7 @@ type CreateFolderRequest struct {
 	UserID string `json:"userId"`
     FolderName string `json:"folderName"`
 }
+
+type GetFolderByUserIDRequest struct {
+	UserID int `json:"userId"`
+}

@@ -18,3 +18,24 @@ func (r *repositoryImpl) CreateFile(file models.File) (error) {
 	return result.Error;
 }
 
+func (r *repositoryImpl) GetFilesByUserID(userId uint) ([]models.File, error) {
+	var files[] models.File;
+
+	result := r.db.Where("user_id = ?", userId).Find(&files);
+	if (result.Error != nil) {
+		return nil, result.Error;
+	}
+
+	return files, nil;
+}
+
+func (r *repositoryImpl) GetFilesByFolderID(userId uint, folderId uint) ([]models.File, error) {
+	var files[] models.File;
+
+	result := r.db.Where("user_id = ? AND folder_id = ?", userId, folderId).Find(&files);
+	if (result.Error != nil) {
+		return nil, result.Error;
+	}
+
+	return files, nil;
+}

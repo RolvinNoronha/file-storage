@@ -9,13 +9,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type application struct {
-	config config
-}
-
 type config struct {
 	addr string
 	db *gorm.DB
+}
+
+type application struct {
+	config config
 }
 
 func (app *application) mount() http.Handler {

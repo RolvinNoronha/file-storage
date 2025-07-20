@@ -55,9 +55,4 @@ func (h *Handler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"token": token});
 }
- 
-func (h *Handler) Protected(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK);
-}
-
 

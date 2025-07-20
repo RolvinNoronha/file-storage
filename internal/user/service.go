@@ -2,6 +2,7 @@ package user
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/RolvinNoronha/fileupload-backend/pkg/models"
@@ -17,39 +18,46 @@ type Service struct {
 func NewService(repo Repository) *Service {
 	return &Service{
 		repo: repo,
+		jwtSecret: []byte(os.Getenv("JWT_SECRET")),
 	}
 }
 
 func (s *Service) CreateUser(user models.User) (*models.ServiceError) {
+
+	existingUser, err := s.repo.GetUserByUsername(user.Username);
+
+	if (err != nil) {
+		return &models.ServiceError{
+			StatusCode: http.StatusInternalServerError,
+			Message: err.Error(),
+		}
+	}
+
+	if (existingUser != nil) {
+		return &models.ServiceError{
+			StatusCode: http.StatusConflict,
+			Message: "Username already exists",
+		}
+	}
+	
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
 	if (err != nil) {
 		return &models.ServiceError{
 			StatusCode: http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Error hashing password",
 		}
 	}
 
 	user.Password = string(hashedPassword);
-
-
-	_, err = s.repo.GetUserByUsername(user.Username);
-
-	if (err == nil) {
-		return &models.ServiceError{
-			StatusCode: http.StatusConflict,
-			Message: "Username already exists!",
-		}
-	}
-
 
 	err = s.repo.CreateUser(user);
 
 	if (err != nil) {
 		return &models.ServiceError{
 			StatusCode: http.StatusInternalServerError,
-			Message: err.Error(),
+			Message: "Error creating user in database",
 		}
 	}
 
@@ -61,10 +69,17 @@ func (s *Service) LoginUser(loginRequest models.AuthRequest) (string, *models.Se
 	user, err := s.repo.GetUserByUsername(loginRequest.Username);
 	var tokenString string;
 
+	if (user == nil) {
+		return tokenString, &models.ServiceError{
+			StatusCode: http.StatusNotFound,
+			Message: "Username does not exist.",
+		}
+	}
+
 	if (err != nil) {
 		return tokenString, &models.ServiceError{
 			StatusCode: http.StatusNotFound,
-			Message: "username does not exist.",
+			Message: "Something went wrong",
 		}
 	}
 

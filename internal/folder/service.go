@@ -29,3 +29,16 @@ func (s *Service) CreateFolder(folder models.Folder) (*models.ServiceError) {
 
 	return nil;
 }
+
+func (s *Service) GetFolderByUserID(userId uint) ([]models.Folder, *models.ServiceError) {
+	folders, err := s.repo.GetFoldersByUserID(userId);
+
+	if (err != nil) {
+		return nil, &models.ServiceError{
+			StatusCode: http.StatusInternalServerError,
+			Message: err.Error(),
+		}
+	}
+
+	return folders, nil;
+}

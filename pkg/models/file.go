@@ -14,10 +14,19 @@ type File struct {
 }
 
 type CreateFileRequest struct {
-	FileName string `json:"fileName"`
-	FilePath string `json:"filePath"`
-	FileType string `json:"fileType"`
-	FileSize uint   `json:"fileSize"`
-	UserID   uint   `json:"userId"`
-	FolderID uint   `json:"folderId"`
+	FileName string  `json:"fileName"`
+	FilePath string  `json:"filePath"`
+	FileType string  `json:"fileType"`
+	FileSize uint    `json:"fileSize"`
+	UserID   uint    `json:"userId"`
+	FolderID *uint   `json:"folderId"`
+}
+
+type GetFilesByUserIDRequest struct {
+	UserID int `json:"userId"`
+}
+
+type GetFilesByFolderIDRequest struct {
+	UserID 	 int `json:"userId"`
+	FolderID int `json:"folderId"`
 }
