@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/RolvinNoronha/fileupload-backend/internal/aws"
 	"github.com/RolvinNoronha/fileupload-backend/internal/db"
 	"github.com/RolvinNoronha/fileupload-backend/internal/env"
 )
@@ -12,6 +13,7 @@ import (
 func main() {
 	env.InitializeEnv();
 	db, err := db.InitializeDb();
+	client := aws.InitializeAws();
 
 	if (err != nil) {
 		log.Fatal(err);
@@ -21,6 +23,7 @@ func main() {
 	cfg := config{
 		addr: fmt.Sprintf(":%s", port),
 		db: db,
+		client: client,
 	}
 
 	app := &application{

@@ -1,6 +1,10 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Folder struct {
 	gorm.Model
@@ -10,11 +14,14 @@ type Folder struct {
 	Files  []File `gorm:"foreignKey:FolderID"`
 }
 
+type FolderDTO struct {
+	Name      string    `json:"name"`
+	UserID    uint      `json:"userId"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
 type CreateFolderRequest struct {
 	UserID string `json:"userId"`
     FolderName string `json:"folderName"`
 }
 
-type GetFolderByUserIDRequest struct {
-	UserID int `json:"userId"`
-}

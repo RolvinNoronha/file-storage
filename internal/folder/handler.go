@@ -47,17 +47,20 @@ func (h *Handler) CreateFolder(c *gin.Context) {
 }
 
 func (h *Handler) GetFoldersByUserID(c *gin.Context) {
-	var getFoldersRequest *models.GetFolderByUserIDRequest;	
+	userIdStr := c.Param("userId");
 
-	if err := c.ShouldBindJSON(&getFoldersRequest); err != nil {
+	userId, err := strconv.Atoi(userIdStr);
+
+
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()});
 		return;
 	}
 
-	folders, err := h.service.GetFolderByUserID(uint(getFoldersRequest.UserID));
+	folders, serr := h.service.GetFolderByUserID(uint(userId));
 
-	if (err != nil) {
-		c.JSON(err.StatusCode, gin.H{"error": err.Message});
+	if (serr != nil) {
+		c.JSON(serr.StatusCode, gin.H{"error": serr.Message});
 		return;
 	}
 

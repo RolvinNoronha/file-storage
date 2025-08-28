@@ -1,6 +1,10 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type File struct {
 	gorm.Model
@@ -13,6 +17,16 @@ type File struct {
 	Folder   Folder   `gorm:"foreignKey:FolderID"` 
 }
 
+type FileDTO struct {
+	Name	  string    `json:"name"`
+	Path	  string    `json:"path"`
+	FileType  string    `json:"type"` 
+	FileSize  uint 	    `json:"size"`
+	UserID	  uint      `json:"userId"`
+	FolderID  *uint     `json:"folderId"` 
+	CreatedAt time.Time `json:"createdAt"`
+}
+
 type CreateFileRequest struct {
 	FileName string  `json:"fileName"`
 	FilePath string  `json:"filePath"`
@@ -20,13 +34,4 @@ type CreateFileRequest struct {
 	FileSize uint    `json:"fileSize"`
 	UserID   uint    `json:"userId"`
 	FolderID *uint   `json:"folderId"`
-}
-
-type GetFilesByUserIDRequest struct {
-	UserID int `json:"userId"`
-}
-
-type GetFilesByFolderIDRequest struct {
-	UserID 	 int `json:"userId"`
-	FolderID int `json:"folderId"`
 }

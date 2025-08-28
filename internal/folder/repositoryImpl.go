@@ -20,7 +20,7 @@ func (r *repositoryImpl) CreateFolder(folder models.Folder) (error) {
 }
 
 func (r *repositoryImpl) GetFoldersByUserID(userId uint) ([]models.Folder, error) {
-	var folders []models.Folder
+	var folders []models.Folder;
 
     result := r.db.Where("user_id = ?", userId).Find(&folders)
 

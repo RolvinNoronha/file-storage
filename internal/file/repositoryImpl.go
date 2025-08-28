@@ -29,7 +29,7 @@ func (r *repositoryImpl) GetFilesByUserID(userId uint) ([]models.File, error) {
 	return files, nil;
 }
 
-func (r *repositoryImpl) GetFilesByFolderID(userId uint, folderId uint) ([]models.File, error) {
+func (r *repositoryImpl) GetFilesByUserIDFolderID(userId uint, folderId uint) ([]models.File, error) {
 	var files[] models.File;
 
 	result := r.db.Where("user_id = ? AND folder_id = ?", userId, folderId).Find(&files);

@@ -30,7 +30,7 @@ func (s *Service) CreateFolder(folder models.Folder) (*models.ServiceError) {
 	return nil;
 }
 
-func (s *Service) GetFolderByUserID(userId uint) ([]models.Folder, *models.ServiceError) {
+func (s *Service) GetFolderByUserID(userId uint) ([]models.FolderDTO, *models.ServiceError) {
 	folders, err := s.repo.GetFoldersByUserID(userId);
 
 	if (err != nil) {
@@ -40,5 +40,14 @@ func (s *Service) GetFolderByUserID(userId uint) ([]models.Folder, *models.Servi
 		}
 	}
 
-	return folders, nil;
+	var folderResponse[] models.FolderDTO;
+	for _, folder := range folders {
+		folderResponse = append(folderResponse, models.FolderDTO{
+			Name: folder.Name,
+			UserID: folder.UserID,
+			CreatedAt: folder.CreatedAt,
+		})
+	}
+
+	return folderResponse, nil;
 }

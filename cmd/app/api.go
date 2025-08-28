@@ -6,12 +6,14 @@ import (
 	"time"
 
 	"github.com/RolvinNoronha/fileupload-backend/internal/routes"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"gorm.io/gorm"
 )
 
 type config struct {
 	addr string
 	db *gorm.DB
+	client *s3.Client
 }
 
 type application struct {
@@ -20,7 +22,7 @@ type application struct {
 
 func (app *application) mount() http.Handler {
 
-	router := routes.NewRouter(app.config.db);
+	router := routes.NewRouter(app.config.db, app.config.client);
 	return router;
 
 	/*
