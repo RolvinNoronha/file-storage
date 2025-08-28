@@ -21,7 +21,6 @@ type FolderDTO struct {
 }
 
 type CreateFolderRequest struct {
-	UserID string `json:"userId"`
-    FolderName string `json:"folderName"`
+	UserID     string `json:"userId"`
+	FolderName string `json:"folderName"`
 }
-

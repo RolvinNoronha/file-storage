@@ -11,8 +11,8 @@ import (
 )
 
 type config struct {
-	addr string
-	db *gorm.DB
+	addr   string
+	db     *gorm.DB
 	client *s3.Client
 }
 
@@ -22,20 +22,20 @@ type application struct {
 
 func (app *application) mount() http.Handler {
 
-	router := routes.NewRouter(app.config.db, app.config.client);
-	return router;
+	router := routes.NewRouter(app.config.db, app.config.client)
+	return router
 
 	/*
-	mux := http.NewServeMux()
-	userRepo := user.NewRepository(app.config.db);
-	userService := user.NewService(userRepo);
-	userHandler := user.NewHandler(userService);
+		mux := http.NewServeMux()
+		userRepo := user.NewRepository(app.config.db);
+		userService := user.NewService(userRepo);
+		userHandler := user.NewHandler(userService);
 
-	mux.HandleFunc("POST /register", userHandler.CreateUser);
-	mux.HandleFunc("/protected", userHandler.Protected);
-	mux.HandleFunc("/refresh", userHandler.Refresh);
+		mux.HandleFunc("POST /register", userHandler.CreateUser);
+		mux.HandleFunc("/protected", userHandler.Protected);
+		mux.HandleFunc("/refresh", userHandler.Refresh);
 
-	return mux
+		return mux
 	*/
 }
 

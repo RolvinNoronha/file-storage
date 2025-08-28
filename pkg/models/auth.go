@@ -12,7 +12,6 @@ type AuthResponse struct {
 }
 
 type Claims struct {
-	UserId string `json:"userId"`
+	UserId    string `json:"userId"`
 	JwtClaims jwt.MapClaims
 }
-

@@ -8,18 +8,16 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-
-
-func InitializeAws() (*s3.Client) {
+func InitializeAws() *s3.Client {
 
 	// Load the Shared AWS Configuration (~/.aws/config)
 	cfg, err := config.LoadDefaultConfig(context.TODO())
-    if err != nil {
-        log.Fatal(err)
-    }
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    // Create an Amazon S3 service client
-    client := s3.NewFromConfig(cfg);
+	// Create an Amazon S3 service client
+	client := s3.NewFromConfig(cfg)
 
-	return client;
+	return client
 }

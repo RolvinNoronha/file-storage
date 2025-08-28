@@ -6,7 +6,6 @@ import (
 	"github.com/RolvinNoronha/fileupload-backend/pkg/models"
 )
 
-
 type Service struct {
 	repo Repository
 }
@@ -17,37 +16,37 @@ func NewService(repo Repository) *Service {
 	}
 }
 
-func (s *Service) CreateFolder(folder models.Folder) (*models.ServiceError) {
-	err := s.repo.CreateFolder(folder);
+func (s *Service) CreateFolder(folder models.Folder) *models.ServiceError {
+	err := s.repo.CreateFolder(folder)
 
-	if (err != nil) {
+	if err != nil {
 		return &models.ServiceError{
 			StatusCode: http.StatusInternalServerError,
-			Message: err.Error(),
+			Message:    err.Error(),
 		}
 	}
 
-	return nil;
+	return nil
 }
 
 func (s *Service) GetFolderByUserID(userId uint) ([]models.FolderDTO, *models.ServiceError) {
-	folders, err := s.repo.GetFoldersByUserID(userId);
+	folders, err := s.repo.GetFoldersByUserID(userId)
 
-	if (err != nil) {
+	if err != nil {
 		return nil, &models.ServiceError{
 			StatusCode: http.StatusInternalServerError,
-			Message: err.Error(),
+			Message:    err.Error(),
 		}
 	}
 
-	var folderResponse[] models.FolderDTO;
+	var folderResponse []models.FolderDTO
 	for _, folder := range folders {
 		folderResponse = append(folderResponse, models.FolderDTO{
-			Name: folder.Name,
-			UserID: folder.UserID,
+			Name:      folder.Name,
+			UserID:    folder.UserID,
 			CreatedAt: folder.CreatedAt,
 		})
 	}
 
-	return folderResponse, nil;
+	return folderResponse, nil
 }

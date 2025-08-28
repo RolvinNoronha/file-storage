@@ -11,18 +11,18 @@ import (
 )
 
 func main() {
-	env.InitializeEnv();
-	db, err := db.InitializeDb();
-	client := aws.InitializeAws();
+	env.InitializeEnv()
+	db, err := db.InitializeDb()
+	client := aws.InitializeAws()
 
-	if (err != nil) {
-		log.Fatal(err);
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	port := os.Getenv("PORT")
 	cfg := config{
-		addr: fmt.Sprintf(":%s", port),
-		db: db,
+		addr:   fmt.Sprintf(":%s", port),
+		db:     db,
 		client: client,
 	}
 

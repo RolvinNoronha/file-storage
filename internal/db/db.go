@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-
 func InitializeDb() (*gorm.DB, error) {
 
 	connStr := os.Getenv("DB_STRING")

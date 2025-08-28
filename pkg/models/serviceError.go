@@ -1,6 +1,6 @@
 package models
 
 type ServiceError struct {
-	StatusCode int;
-	Message string;
+	StatusCode int
+	Message    string
 }
