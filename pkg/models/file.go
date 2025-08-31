@@ -28,10 +28,5 @@ type FileDTO struct {
 }
 
 type CreateFileRequest struct {
-	FileName string `json:"fileName"`
-	FilePath string `json:"filePath"`
-	FileType string `json:"fileType"`
-	FileSize uint   `json:"fileSize"`
-	UserID   uint   `json:"userId"`
-	FolderID *uint  `json:"folderId"`
+	FolderID *uint `json:"folderId"`
 }

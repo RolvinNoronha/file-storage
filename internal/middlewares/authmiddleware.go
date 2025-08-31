@@ -3,7 +3,6 @@ package middleware
 import (
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -11,15 +10,16 @@ import (
 
 func AuthMiddleWare() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
-			c.Abort()
-			return
-		}
+		// authHeader := c.GetHeader("Authorization")
+		// if authHeader == "" {
+		// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
+		// 	c.Abort()
+		// 	return
+		// }
 
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		if tokenString == authHeader {
+		// tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		tokenString, err := c.Cookie("token")
+		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Bearer token is required"})
 			c.Abort()
 			return

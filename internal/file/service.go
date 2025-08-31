@@ -1,10 +1,16 @@
 package file
 
 import (
+	"context"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
 
 	"github.com/RolvinNoronha/fileupload-backend/pkg/models"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
 type Service struct {
@@ -19,8 +25,48 @@ func NewService(repo Repository, client *s3.Client) *Service {
 	}
 }
 
-func (s *Service) CreateFile(file models.File) *models.ServiceError {
-	err := s.repo.CreateFile(file)
+func (s *Service) CreateFile(file multipart.File, fileHeader *multipart.FileHeader, folderId *uint, userId uint) *models.ServiceError {
+
+	// get content type
+	buf := make([]byte, 512)
+	_, err := file.Read(buf)
+	if err != nil {
+		return &models.ServiceError{
+			StatusCode: http.StatusInternalServerError,
+			Message:    err.Error(),
+		}
+	}
+
+	contentType := http.DetectContentType(buf)
+
+	file.Seek(0, io.SeekStart)
+
+	// upload to s3
+	_, err = s.client.PutObject(context.Background(), &s3.PutObjectInput{
+		Bucket:            aws.String(os.Getenv("BUCKET_NAME")),
+		Key:               aws.String(fileHeader.Filename),
+		ChecksumAlgorithm: types.ChecksumAlgorithmCrc32,
+		Body:              file,
+		ContentType:       aws.String(contentType),
+	})
+
+	if err != nil {
+		return &models.ServiceError{
+			StatusCode: http.StatusInternalServerError,
+			Message:    err.Error(),
+		}
+	}
+
+	// create db entry
+	dbFile := models.File{
+		UserID:   userId,
+		Name:     fileHeader.Filename,
+		FileSize: uint(fileHeader.Size),
+		FileType: contentType,
+		FolderID: folderId,
+	}
+
+	err = s.repo.CreateFile(dbFile)
 
 	if err != nil {
 		return &models.ServiceError{

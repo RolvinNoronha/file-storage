@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/RolvinNoronha/fileupload-backend/pkg/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,24 +18,46 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) CreateFile(c *gin.Context) {
-	var fileDetails models.CreateFileRequest
 
-	if err := c.ShouldBindJSON(&fileDetails); err != nil {
+	// check userId
+	userId, exists := c.Get("userId")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unorthorized request"})
+		return
+	}
+
+	// max file size 15 mb
+	err := c.Request.ParseMultipartForm(15 << 20)
+	if err != nil {
+		c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "File is too large"})
+		return
+	}
+
+	folderIdStr := c.Request.FormValue("folderId")
+	var folderId64 uint64
+
+	folderId64, _ = strconv.ParseUint(folderIdStr, 10, 64)
+	folderId := uint(folderId64)
+
+	file, fileHeader, err := c.Request.FormFile("file")
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	file := models.File{
-		UserID:   uint(fileDetails.UserID),
-		Name:     fileDetails.FileName,
-		FileSize: uint(fileDetails.FileSize),
-		FileType: fileDetails.FileType,
-		FolderID: fileDetails.FolderID,
+	defer file.Close()
+
+	// convert userId to uint
+	userIdFloat, ok := userId.(float64)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid userId type"})
+		return
 	}
 
-	err := h.service.CreateFile(file)
-	if err != nil {
-		c.JSON(err.StatusCode, gin.H{"error": err.Message})
+	// file upload service
+	serr := h.service.CreateFile(file, fileHeader, &folderId, uint(userIdFloat))
+	if serr != nil {
+		c.JSON(serr.StatusCode, gin.H{"error": serr.Message})
 		return
 	}
 
