@@ -46,18 +46,39 @@ func (h *Handler) CreateFolder(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully created folder"})
 }
 
-func (h *Handler) GetFoldersByUserID(c *gin.Context) {
-	userIdStr := c.Param("userId")
-
-	userId, err := strconv.Atoi(userIdStr)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+func (h *Handler) GetFolders(c *gin.Context) {
+	userId, exists := c.Get("userId")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Request resource is not authorized"})
 		return
 	}
 
-	folders, serr := h.service.GetFolderByUserID(uint(userId))
+	uidFloat, ok := userId.(float64)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid userId type"})
+		return
+	}
 
+	folders, serr := h.service.GetFolderByUserID(uint(uidFloat))
+
+	if serr != nil {
+		c.JSON(serr.StatusCode, gin.H{"error": serr.Message})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"folders": folders})
+}
+
+func (h *Handler) GetFoldersByFolderId(c *gin.Context) {
+	folderIdStr := c.Param("folderId")
+
+	folderId, err := strconv.Atoi(folderIdStr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error parsing folderID"})
+		return
+	}
+
+	folders, serr := h.service.GetFolderByFolderID(uint(folderId))
 	if serr != nil {
 		c.JSON(serr.StatusCode, gin.H{"error": serr.Message})
 		return

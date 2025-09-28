@@ -50,3 +50,25 @@ func (s *Service) GetFolderByUserID(userId uint) ([]models.FolderDTO, *models.Se
 
 	return folderResponse, nil
 }
+
+func (s *Service) GetFolderByFolderID(folderId uint) ([]models.FolderDTO, *models.ServiceError) {
+	folders, err := s.repo.GetFoldersByFolderID(folderId)
+
+	if err != nil {
+		return nil, &models.ServiceError{
+			StatusCode: http.StatusInternalServerError,
+			Message:    err.Error(),
+		}
+	}
+
+	var folderResponse []models.FolderDTO
+	for _, folder := range folders {
+		folderResponse = append(folderResponse, models.FolderDTO{
+			Name:      folder.Name,
+			UserID:    folder.UserID,
+			CreatedAt: folder.CreatedAt,
+		})
+	}
+
+	return folderResponse, nil
+}

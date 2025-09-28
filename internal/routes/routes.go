@@ -50,7 +50,8 @@ func NewRouter(db *gorm.DB, client *s3.Client) http.Handler {
 		folderHandler := folder.NewHandler(folderService)
 
 		folderRoutes.POST("/create", folderHandler.CreateFolder)
-		folderRoutes.GET("/folders/:userId", folderHandler.GetFoldersByUserID)
+		folderRoutes.GET("/folders", folderHandler.GetFolders)
+		folderRoutes.GET("/folders/:folderId", folderHandler.GetFoldersByFolderId)
 	}
 
 	return g
