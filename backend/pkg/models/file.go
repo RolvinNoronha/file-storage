@@ -12,7 +12,7 @@ type File struct {
 	Path      string    `gorm:"type:varchar(255);not null"`
 	FileType  string    `gorm:"type:varchar(100)"`
 	FileUrl   string    `gorm:"type:varchar(255)"`
-	ExpiresAt time.Time `gorm:"type:TIMESTAMP"`
+	ExpiresAt time.Time `gorm:"type:date"`
 	FileSize  uint
 	UserID    uint   `gorm:"not null"`
 	FolderID  *uint  `gorm:"index"`
