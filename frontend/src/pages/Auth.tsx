@@ -7,6 +7,7 @@ import Header from "../components/Header";
 import Layout from "../components/Layout";
 import { notifications } from "@mantine/notifications";
 import { useNavigate } from "react-router";
+import AppService from "../service/AppService";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -14,9 +15,17 @@ const Auth = () => {
   const { login } = useAuth();
   const [signin, setSignin] = useState<boolean>(false);
 
-  const handleLogin = () => {
-    login("sometoken");
-    navigate("/files");
+  const [userName, setUserName] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
+  const handleLogin = async () => {
+    try {
+      const result = await AppService.login(userName, password);
+
+      navigate("/files");
+    } catch (error) {
+      console.error("Failed to login: ", error);
+    }
   };
 
   const handleSignIn = () => {

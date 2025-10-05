@@ -19,9 +19,12 @@ func NewHandler(service *Service) *Handler {
 
 func (h *Handler) CreateUser(c *gin.Context) {
 	var authRequest models.AuthRequest
+	var res models.APIResponse
 
 	if err := c.ShouldBindJSON(&authRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		res.Message = err.Error()
+		res.Success = false
+		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
@@ -33,29 +36,39 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	err := h.service.CreateUser(user)
 
 	if err != nil {
-		c.JSON(err.StatusCode, gin.H{"error": err.Message})
+		res.Message = err.Message
+		res.Success = false
+		c.JSON(err.StatusCode, res)
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "successfully created user"})
+	res.Message = "Successfully created user"
+	res.Success = true
+	c.JSON(http.StatusCreated, res)
 }
 
 func (h *Handler) Login(c *gin.Context) {
 	var loginRequest models.AuthRequest
+	var res models.APIResponse
+
 	if err := c.ShouldBindJSON(&loginRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		res.Message = err.Error()
+		res.Success = false
+		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	token, err := h.service.LoginUser(loginRequest)
+	userDto, err := h.service.LoginUser(loginRequest)
 	if err != nil {
-		c.JSON(err.StatusCode, gin.H{"error": err.Message})
+		res.Message = err.Message
+		res.Success = false
+		c.JSON(err.StatusCode, res)
 		return
 	}
 
 	c.SetCookie(
 		"token",
-		token,
+		userDto.Token,
 		3600,
 		"/",
 		"localhost",
@@ -63,5 +76,8 @@ func (h *Handler) Login(c *gin.Context) {
 		true,
 	)
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	res.Message = "Successfull logged in"
+	res.Success = true
+	res.Data = userDto
+	c.JSON(http.StatusOK, res)
 }

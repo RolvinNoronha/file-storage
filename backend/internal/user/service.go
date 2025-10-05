@@ -63,20 +63,20 @@ func (s *Service) CreateUser(user models.User) *models.ServiceError {
 	return nil
 }
 
-func (s *Service) LoginUser(loginRequest models.AuthRequest) (string, *models.ServiceError) {
+func (s *Service) LoginUser(loginRequest models.AuthRequest) (*models.UserDTO, *models.ServiceError) {
 
 	user, err := s.repo.GetUserByUsername(loginRequest.Username)
 	var tokenString string
 
 	if user == nil {
-		return tokenString, &models.ServiceError{
+		return nil, &models.ServiceError{
 			StatusCode: http.StatusNotFound,
 			Message:    "Username does not exist.",
 		}
 	}
 
 	if err != nil {
-		return tokenString, &models.ServiceError{
+		return nil, &models.ServiceError{
 			StatusCode: http.StatusNotFound,
 			Message:    "Something went wrong",
 		}
@@ -84,7 +84,7 @@ func (s *Service) LoginUser(loginRequest models.AuthRequest) (string, *models.Se
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginRequest.Password))
 	if err != nil {
-		return tokenString, &models.ServiceError{
+		return nil, &models.ServiceError{
 			StatusCode: http.StatusUnauthorized,
 			Message:    "Invalid username or password",
 		}
@@ -98,11 +98,17 @@ func (s *Service) LoginUser(loginRequest models.AuthRequest) (string, *models.Se
 	tokenString, err = token.SignedString([]byte(s.jwtSecret))
 
 	if err != nil {
-		return tokenString, &models.ServiceError{
+		return nil, &models.ServiceError{
 			StatusCode: http.StatusInternalServerError,
 			Message:    err.Error(),
 		}
 	}
 
-	return tokenString, nil
+	userDto := &models.UserDTO{
+		Username: user.Username,
+		UserId:   user.ID,
+		Token:    tokenString,
+	}
+
+	return userDto, nil
 }

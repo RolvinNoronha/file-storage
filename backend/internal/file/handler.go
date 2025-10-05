@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/RolvinNoronha/fileupload-backend/pkg/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,17 +20,23 @@ func NewHandler(service *Service) *Handler {
 
 func (h *Handler) CreateFile(c *gin.Context) {
 
+	var res models.APIResponse
+
 	// check userId
 	userId, exists := c.Get("userId")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unorthorized request"})
+		res.Message = "unauthorized request"
+		res.Success = false
+		c.JSON(http.StatusUnauthorized, res)
 		return
 	}
 
 	// max file size 15 mb
 	err := c.Request.ParseMultipartForm(15 << 20)
 	if err != nil {
-		c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "File is too large"})
+		res.Message = "File is too large"
+		res.Success = false
+		c.JSON(http.StatusRequestEntityTooLarge, res)
 		return
 	}
 
@@ -41,7 +48,10 @@ func (h *Handler) CreateFile(c *gin.Context) {
 
 	file, fileHeader, err := c.Request.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		res.Message = "No file in request"
+		res.Success = false
+		res.Errors = err.Error()
+		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
@@ -50,79 +60,128 @@ func (h *Handler) CreateFile(c *gin.Context) {
 	// convert userId to uint
 	userIdFloat, ok := userId.(float64)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid userId type"})
+		res.Message = "Invalid userId type"
+		res.Success = false
+		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
 	// file upload service
 	serr := h.service.CreateFile(file, fileHeader, &folderId, uint(userIdFloat))
 	if serr != nil {
-		c.JSON(serr.StatusCode, gin.H{"error": serr.Message})
+		res.Message = serr.Message
+		res.Success = false
+		c.JSON(serr.StatusCode, res)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Successfully created file"})
+	res.Message = "Successfully created file"
+	res.Success = true
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) GetFileByUserID(c *gin.Context) {
-	userIdStr := c.Param("userId")
-
-	userId, err := strconv.Atoi(userIdStr)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var res models.APIResponse
+	userId, exists := c.Get("userId")
+	if !exists {
+		res.Message = "Request resource is not authorized"
+		res.Success = false
+		c.JSON(http.StatusUnauthorized, res)
 		return
 	}
 
-	files, serr := h.service.GetFilesByUserID(uint(userId))
+	uidFloat, ok := userId.(float64)
+	if !ok {
+		res.Message = "Invalid userId type"
+		res.Success = false
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	files, serr := h.service.GetFilesByUserID(uint(uidFloat))
 
 	if serr != nil {
-		c.JSON(serr.StatusCode, gin.H{"error": serr.Message})
+		res.Message = serr.Message
+		res.Success = false
+		c.JSON(serr.StatusCode, res)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"files": files})
+	res.Message = "Successfully fetched files"
+	res.Data = files
+	res.Success = true
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) GetFileByUserIDFolderID(c *gin.Context) {
 
-	userIdStr := c.Param("userId")
-	folderIdStr := c.Param("folderId")
+	var res models.APIResponse
+	userId, exists := c.Get("userId")
+	if !exists {
+		res.Message = "Request resource is not authorized"
+		res.Success = false
+		c.JSON(http.StatusUnauthorized, res)
+		return
+	}
 
-	userId, _ := strconv.Atoi(userIdStr)
+	uidFloat, ok := userId.(float64)
+	if !ok {
+		res.Message = "Invalid userId type"
+		res.Success = false
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	folderIdStr := c.Param("folderId")
 	folderId, err := strconv.Atoi(folderIdStr)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		res.Message = err.Error()
+		res.Success = false
+		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	files, serr := h.service.GetFilesByUserIDFolderID(uint(userId), uint(folderId))
+	files, serr := h.service.GetFilesByUserIDFolderID(uint(uidFloat), uint(folderId))
 
 	if serr != nil {
-		c.JSON(serr.StatusCode, gin.H{"error": serr.Message})
+		res.Message = serr.Message
+		res.Success = false
+		c.JSON(serr.StatusCode, res)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"files": files})
+	res.Message = "Successfully fetch files"
+	res.Success = true
+	res.Data = files
+
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) GetFileUrl(c *gin.Context) {
+	var res models.APIResponse
 	fileIdStr := c.Param("fileId")
 
 	fileId, err := strconv.Atoi(fileIdStr)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		res.Message = err.Error()
+		res.Success = false
+		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
 	fileUrl, serr := h.service.GetFileUrl(uint(fileId))
 
 	if serr != nil {
-		c.JSON(serr.StatusCode, gin.H{"error": serr.Message})
+		res.Message = serr.Message
+		res.Success = false
+		c.JSON(serr.StatusCode, res)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"fileUrl": fileUrl})
+	res.Message = "Successfull fetch file url"
+	res.Success = true
+	res.Data = fileUrl
+	c.JSON(http.StatusOK, res)
 }

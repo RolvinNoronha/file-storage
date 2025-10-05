@@ -47,13 +47,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = (token: string) => {
-    document.cookie = `jwt_token=${token}; path=/; secure; samesite=strict`;
+    // document.cookie = `jwt_token=${token}; path=/; secure; samesite=strict`;
     setAuthToken(token);
     setIsAuthenticated(true);
   };
 
   const logout = () => {
-    document.cookie = "jwt_token=; path=/; max-age=-1";
+    // document.cookie = "jwt_token=; path=/; max-age=-1";
     setAuthToken(null);
     setIsAuthenticated(false);
   };

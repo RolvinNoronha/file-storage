@@ -9,3 +9,9 @@ type User struct {
 	Files    []File   `gorm:"foreignKey:UserID"`
 	Folders  []Folder `gorm:"foreignKey:UserID"`
 }
+
+type UserDTO struct {
+	Username string `json:"userName"`
+	UserId   uint   `json:"userId"`
+	Token    string `json:"token"`
+}

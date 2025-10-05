@@ -38,8 +38,8 @@ func NewRouter(db *gorm.DB, client *s3.Client) http.Handler {
 		fileHandler := file.NewHandler(fileService)
 
 		fileRoutes.POST("/create", fileHandler.CreateFile)
-		fileRoutes.GET("/files/:userId", fileHandler.GetFileByUserID)
-		fileRoutes.GET("/files/:userId/:folderId", fileHandler.GetFileByUserIDFolderID)
+		fileRoutes.GET("/files", fileHandler.GetFileByUserID)
+		fileRoutes.GET("/files/:folderId", fileHandler.GetFileByUserIDFolderID)
 		fileRoutes.GET("/url/:fileId", fileHandler.GetFileUrl)
 	}
 

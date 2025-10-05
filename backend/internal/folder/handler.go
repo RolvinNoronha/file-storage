@@ -19,70 +19,107 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) CreateFolder(c *gin.Context) {
-	var folderDetails models.CreateFolderRequest
+	var res models.APIResponse
 
-	if err := c.ShouldBindJSON(&folderDetails); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	userId, exists := c.Get("userId")
+	if !exists {
+		res.Message = "Request resource is not authorized"
+		res.Success = false
+		c.JSON(http.StatusUnauthorized, res)
 		return
 	}
 
-	id, err := strconv.Atoi(folderDetails.UserID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	uidFloat, ok := userId.(float64)
+
+	if !ok {
+		res.Message = "Invalide user id type"
+		res.Success = false
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+	var folderDetails models.CreateFolderRequest
+
+	if err := c.ShouldBindJSON(&folderDetails); err != nil {
+		res.Message = err.Error()
+		res.Success = false
+		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
 	folder := models.Folder{
-		UserID: uint(id),
+		UserID: uint(uidFloat),
 		Name:   folderDetails.FolderName,
 	}
 
 	er := h.service.CreateFolder(folder)
 	if er != nil {
-		c.JSON(er.StatusCode, gin.H{"error": er.Message})
+		res.Message = er.Message
+		res.Success = false
+		c.JSON(er.StatusCode, res)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Successfully created folder"})
+	res.Message = "Successfully created folder"
+	res.Success = true
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) GetFolders(c *gin.Context) {
+	var res models.APIResponse
 	userId, exists := c.Get("userId")
+
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Request resource is not authorized"})
+		res.Message = "Requested resource is not authorized"
+		res.Success = false
+		c.JSON(http.StatusUnauthorized, res)
 		return
 	}
 
 	uidFloat, ok := userId.(float64)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid userId type"})
+		res.Message = "Invalid user id type"
+		res.Success = false
+		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
 	folders, serr := h.service.GetFolderByUserID(uint(uidFloat))
 
 	if serr != nil {
-		c.JSON(serr.StatusCode, gin.H{"error": serr.Message})
+		res.Message = serr.Message
+		res.Success = false
+		c.JSON(serr.StatusCode, res)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"folders": folders})
+	res.Message = "Successfully fetch folders"
+	res.Success = true
+	res.Data = folders
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) GetFoldersByFolderId(c *gin.Context) {
+	var res models.APIResponse
 	folderIdStr := c.Param("folderId")
 
 	folderId, err := strconv.Atoi(folderIdStr)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error parsing folderID"})
+		res.Message = "Error parsing folder id"
+		res.Success = false
+		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
 	folders, serr := h.service.GetFolderByFolderID(uint(folderId))
 	if serr != nil {
-		c.JSON(serr.StatusCode, gin.H{"error": serr.Message})
+		res.Message = serr.Message
+		res.Success = false
+		c.JSON(serr.StatusCode, res)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"folders": folders})
+	res.Message = "Successfully fetched folders"
+	res.Success = true
+	res.Data = folders
+	c.JSON(http.StatusOK, res)
 }
