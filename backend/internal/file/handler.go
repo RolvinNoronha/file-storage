@@ -41,10 +41,13 @@ func (h *Handler) CreateFile(c *gin.Context) {
 	}
 
 	folderIdStr := c.Request.FormValue("folderId")
-	var folderId64 uint64
 
-	folderId64, _ = strconv.ParseUint(folderIdStr, 10, 64)
-	folderId := uint(folderId64)
+	var folderId *uint = nil
+	folderId64, err := strconv.ParseUint(folderIdStr, 10, 64)
+	if err == nil {
+		fId := uint(folderId64)
+		folderId = &fId
+	}
 
 	file, fileHeader, err := c.Request.FormFile("file")
 	if err != nil {
@@ -67,7 +70,7 @@ func (h *Handler) CreateFile(c *gin.Context) {
 	}
 
 	// file upload service
-	serr := h.service.CreateFile(file, fileHeader, &folderId, uint(userIdFloat))
+	serr := h.service.CreateFile(file, fileHeader, folderId, uint(userIdFloat))
 	if serr != nil {
 		res.Message = serr.Message
 		res.Success = false
@@ -83,6 +86,7 @@ func (h *Handler) CreateFile(c *gin.Context) {
 func (h *Handler) GetFileByUserID(c *gin.Context) {
 	var res models.APIResponse
 	userId, exists := c.Get("userId")
+
 	if !exists {
 		res.Message = "Request resource is not authorized"
 		res.Success = false

@@ -47,8 +47,9 @@ func (h *Handler) CreateFolder(c *gin.Context) {
 	}
 
 	folder := models.Folder{
-		UserID: uint(uidFloat),
-		Name:   folderDetails.FolderName,
+		UserID:         uint(uidFloat),
+		Name:           folderDetails.FolderName,
+		ParentFolderID: folderDetails.ParentFolderID,
 	}
 
 	er := h.service.CreateFolder(folder)

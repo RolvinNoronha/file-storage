@@ -53,8 +53,8 @@ func (r *repositoryImpl) GetFile(fileId uint) (*models.File, error) {
 
 func (r *repositoryImpl) UpdateFile(file models.File) error {
 	err := r.db.Model(&models.File{}).Where("id = ?", file.ID).Updates(models.File{
-		FileUrl:   file.FileUrl,
-		ExpiresAt: file.ExpiresAt,
+		FileUrl:       file.FileUrl,
+		FileUrlExpiry: file.FileUrlExpiry,
 	}).Error
 
 	if err != nil {

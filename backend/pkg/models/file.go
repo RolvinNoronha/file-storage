@@ -8,15 +8,15 @@ import (
 
 type File struct {
 	gorm.Model
-	Name      string    `gorm:"type:varchar(100);not null"`
-	Path      string    `gorm:"type:varchar(255);not null"`
-	FileType  string    `gorm:"type:varchar(100)"`
-	FileUrl   string    `gorm:"type:varchar(255)"`
-	ExpiresAt time.Time `gorm:"type:date"`
-	FileSize  uint
-	UserID    uint   `gorm:"not null"`
-	FolderID  *uint  `gorm:"index"`
-	Folder    Folder `gorm:"foreignKey:FolderID"`
+	Name          string     `gorm:"type:varchar(100);not null"`
+	Path          string     `gorm:"type:varchar(255);not null"`
+	FileType      string     `gorm:"type:varchar(100)"`
+	FileUrl       string     `gorm:"type:varchar(255)"`
+	FileUrlExpiry *time.Time `gorm:"type:date"`
+	FileSize      uint
+	UserID        uint   `gorm:"not null"`
+	FolderID      *uint  `gorm:"index"`
+	Folder        Folder `gorm:"foreignKey:FolderID"`
 }
 
 type FileDTO struct {

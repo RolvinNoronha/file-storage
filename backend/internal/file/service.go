@@ -64,11 +64,13 @@ func (s *Service) CreateFile(file multipart.File, fileHeader *multipart.FileHead
 
 	// create db entry
 	dbFile := models.File{
-		UserID:   userId,
-		Name:     fileHeader.Filename,
-		FileSize: uint(fileHeader.Size),
-		FileType: contentType,
-		FolderID: folderId,
+		UserID:        userId,
+		Name:          fileHeader.Filename,
+		FileSize:      uint(fileHeader.Size),
+		FileType:      contentType,
+		FolderID:      folderId,
+		FileUrlExpiry: nil,
+		FileUrl:       "",
 	}
 
 	err = s.repo.CreateFile(dbFile)
@@ -168,7 +170,7 @@ func (s *Service) GetFileUrl(fileId uint) (*models.FileUrlDTO, *models.ServiceEr
 		return nil, err
 	}
 
-	if time.Now().After(file.ExpiresAt) {
+	if file.FileUrlExpiry == nil || time.Now().After(*file.FileUrlExpiry) {
 		bucketName := s.bucketName
 		objectKey := file.Name
 		expiresIn := 60 * time.Minute // URL valid for 15 minutes
@@ -187,9 +189,12 @@ func (s *Service) GetFileUrl(fileId uint) (*models.FileUrlDTO, *models.ServiceEr
 		}
 
 		file.FileUrl = presignedURL.URL
-		file.ExpiresAt = expiryTime
+		file.FileUrlExpiry = &expiryTime
 
-		s.UpdateFile(file)
+		serr := s.UpdateFile(file)
+		if serr != nil {
+			return nil, serr
+		}
 
 		fileUrl := &models.FileUrlDTO{
 			FileUrl: presignedURL.URL,

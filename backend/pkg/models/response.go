@@ -2,7 +2,7 @@ package models
 
 type APIResponse struct {
 	Success bool   `json:"success"`
-	Message string `json:"Message"`
+	Message string `json:"message"`
 	Data    any    `json:"data"`
 	Errors  any    `json:"errors"`
 }
