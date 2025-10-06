@@ -63,6 +63,7 @@ const Auth = () => {
               input: {
                 backgroundColor: colors.background3,
                 color: colors.text,
+                borderColor: colors.primary,
               },
             }}
           />
@@ -76,6 +77,7 @@ const Auth = () => {
               input: {
                 backgroundColor: colors.background3,
                 color: colors.text,
+                borderColor: colors.primary,
               },
             }}
           />

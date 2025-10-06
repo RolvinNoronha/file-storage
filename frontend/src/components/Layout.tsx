@@ -12,7 +12,7 @@ const Layout = ({
 
   return (
     <div
-      className="h-screen w-screen  transition-colors ease-out duration-100"
+      className="h-screen w-screen overflow-auto transition-colors ease-out duration-100"
       style={{ backgroundColor: colors.background1 }}
     >
       {header}

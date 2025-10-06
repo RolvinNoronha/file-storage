@@ -33,7 +33,7 @@ const getCookie = (name: string) => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [authToken, setAuthToken] = useState<string | null | undefined>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const token = getCookie("jwt_token");

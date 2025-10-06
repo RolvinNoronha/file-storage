@@ -11,7 +11,7 @@ const Dashboard = () => {
 
   return (
     <Layout header={<Header />}>
-      <Stack h={"90vh"} w={"100vw"} mx={20}>
+      <Stack h={"90vh"} w={"100vw"}>
         <Group w={"100%"} justify="center">
           <Input
             w={"60%"}
@@ -22,6 +22,7 @@ const Dashboard = () => {
               input: {
                 backgroundColor: colors.background2,
                 color: colors.text,
+                borderColor: colors.primary,
               },
             }}
             rightSection={<IoIosSearch size={30} />}
@@ -32,7 +33,7 @@ const Dashboard = () => {
                 size="lg"
                 rightSection={<LuFilter />}
                 variant="outline"
-                c={colors.primary}
+                color={colors.primary}
               >
                 Filter
               </Button>

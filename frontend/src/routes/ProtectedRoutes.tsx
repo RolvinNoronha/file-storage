@@ -16,9 +16,10 @@ const ProtectedRoutes = () => {
     );
   }
 
-  if (!isAuthenticated || !authToken) {
-    return <Navigate to={"/auth"} />;
-  }
+  // if (!isAuthenticated || !authToken) {
+  //   return <Navigate to={"/auth"} />;
+  // }
+
   return <Outlet />;
 };
 

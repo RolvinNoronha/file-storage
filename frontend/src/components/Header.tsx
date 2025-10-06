@@ -4,6 +4,7 @@ import { useAppTheme } from "../context/ThemeContext";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { useAuth } from "../context/AuthContext";
 import { useDisclosure } from "@mantine/hooks";
+import filesIcons from "../assets/files-icon.png";
 
 const Header = () => {
   const { isAuthenticated, logout } = useAuth();
@@ -13,9 +14,14 @@ const Header = () => {
   return (
     <Stack h={"10vh"} justify="center">
       <Group px={"md"} justify="space-between">
-        <Title c={colors.text}>File Uploader</Title>
         <Group>
-          {isAuthenticated ? (
+          <img className="h-8 w-8" src={filesIcons} />
+          <Title mt={12} my={"auto"} c={colors.text}>
+            File Uploader
+          </Title>
+        </Group>
+        <Group>
+          {!isAuthenticated ? (
             <>
               <div className="flex items-center justify-center">
                 <input
@@ -107,6 +113,7 @@ const Header = () => {
             input: {
               backgroundColor: colors.background3,
               color: colors.text,
+              borderColor: colors.primary,
             },
           }}
         />
