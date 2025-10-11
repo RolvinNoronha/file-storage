@@ -289,7 +289,7 @@ const FilesAndFolders = () => {
                 className="flex flex-col justify-center items-center p-2 rounded-lg hover:cursor-pointer"
               >
                 {getIcon(f.fileType)}
-                <Text my={10} c={colors.text}>
+                <Text fw={500} my={10} c={colors.text}>
                   {f.fileName + " - 12/12/2024"}
                 </Text>
               </div>
@@ -307,7 +307,7 @@ const FilesAndFolders = () => {
                 }}
               >
                 <FaFolder size={100} color={colors.primary} />
-                <Text my={10} c={colors.text}>
+                <Text fw={500} my={10} c={colors.text}>
                   {f.folderName + " - 12/12/2024"}
                 </Text>
               </div>

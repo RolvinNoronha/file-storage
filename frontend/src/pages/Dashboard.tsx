@@ -11,7 +11,7 @@ const Dashboard = () => {
 
   return (
     <Layout header={<Header />}>
-      <Stack h={"90vh"} w={"100vw"}>
+      <Stack mt={10} h={"94vh"} w={"100vw"}>
         <Group w={"100%"} justify="center">
           <Input
             w={"60%"}

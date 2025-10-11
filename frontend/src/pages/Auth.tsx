@@ -45,7 +45,7 @@ const Auth = () => {
 
   return (
     <Layout header={<Header />}>
-      <div className="h-[90vh] w-[100vw] flex justify-center items-center">
+      <div className="h-[94vh] w-[100vw] flex justify-center items-center">
         <div
           className="p-8 w-[30rem] rounded-lg shadow-md"
           style={{ backgroundColor: colors.background2 }}
@@ -105,7 +105,8 @@ const Auth = () => {
           <Text size="sm" c={colors.text}>
             {signin ? "Don't have an account? " : "Already have an account? "}
             <span
-              className="text-blue-400 hover:cursor-pointer"
+              style={{ color: colors.secondary }}
+              className="hover:cursor-pointer"
               onClick={() => setSignin((preValue) => !preValue)}
             >
               {signin ? "Register" : "Login"}

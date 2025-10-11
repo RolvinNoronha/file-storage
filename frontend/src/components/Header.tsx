@@ -12,69 +12,123 @@ const Header = () => {
   const [opened, { open, close }] = useDisclosure(false);
 
   return (
-    <Stack h={"10vh"} justify="center">
-      <Group px={"md"} justify="space-between">
-        <Group>
-          <img className="h-8 w-8" src={filesIcons} />
-          <Title mt={12} my={"auto"} c={colors.text}>
-            File Uploader
-          </Title>
-        </Group>
-        <Group>
-          {!isAuthenticated ? (
-            <>
-              <div className="flex items-center justify-center">
-                <input
-                  type="file"
-                  id="fileInput"
-                  className="hidden"
-                  accept="*/*"
-                  onChange={() => {}}
-                />
-                <label
-                  htmlFor="fileInput"
-                  className="cursor-pointer text-white font-semibold px-6 py-2 rounded-sm focus:outline-none focus:ring-2"
-                  style={{ background: colors.primary }}
+    <>
+      <Stack
+        h={"6vh"}
+        justify="center"
+        className="sticky top-0 bg-transparent backdrop-blur-3xl z-50"
+      >
+        <Group px={"md"} justify="space-between">
+          <Group>
+            <img className="h-8 w-8" src={filesIcons} />
+            <Title c={colors.text} mt={0}>
+              File Uploader
+            </Title>
+          </Group>
+          <Group>
+            {isAuthenticated ? (
+              <>
+                <div className="flex items-center justify-center">
+                  <input
+                    type="file"
+                    id="fileInput"
+                    className="hidden"
+                    accept="*/*"
+                    onChange={() => {}}
+                  />
+                  <label
+                    htmlFor="fileInput"
+                    className="cursor-pointer text-white font-semibold px-6 py-2 rounded-sm focus:outline-none focus:ring-2"
+                    style={{ background: colors.primary }}
+                  >
+                    Choose File
+                  </label>
+                </div>
+                <Button size="md" color={colors.primary} onClick={open}>
+                  Add Folder
+                </Button>
+                <Button
+                  size="md"
+                  variant="outline"
+                  color={"red"}
+                  onClick={logout}
                 >
-                  Choose File
-                </label>
-              </div>
-              <Button size="md" color={colors.primary} onClick={open}>
-                Add Folder
-              </Button>
-              <Button
-                size="md"
-                variant="outline"
-                color={"red"}
-                onClick={logout}
-              >
-                Log Out
-              </Button>
-            </>
-          ) : (
-            <Link to={"/auth"}>
-              <Button size="md" color={colors.primary}>
-                Get Started
-              </Button>
-            </Link>
-          )}
-          {theme === "dark" ? (
-            <MdDarkMode
-              color={colors.text}
-              size={30}
-              className="hover:cursor-pointer"
-              onClick={toggleTheme}
-            />
-          ) : (
-            <MdLightMode
-              color={colors.text}
-              size={30}
-              className="hover:cursor-pointer"
-              onClick={toggleTheme}
-            />
-          )}
+                  Log Out
+                </Button>
+              </>
+            ) : (
+              <Link to={"/auth"}>
+                <Button size="md" color={colors.primary}>
+                  Get Started
+                </Button>
+              </Link>
+            )}
+            {theme === "dark" ? (
+              <MdDarkMode
+                color={colors.text}
+                size={30}
+                className="hover:cursor-pointer"
+                onClick={toggleTheme}
+              />
+            ) : (
+              <MdLightMode
+                color={colors.text}
+                size={30}
+                className="hover:cursor-pointer"
+                onClick={toggleTheme}
+              />
+            )}
+          </Group>
         </Group>
-      </Group>
+
+        <Modal
+          opened={opened}
+          centered
+          onClose={close}
+          withCloseButton={false}
+          closeOnClickOutside={false}
+          title="Folder Name"
+          styles={{
+            title: {
+              color: colors.text,
+            },
+            content: {
+              backgroundColor: colors.background1,
+            },
+            header: {
+              backgroundColor: colors.background1,
+            },
+          }}
+        >
+          <TextInput
+            my={10}
+            c={colors.text}
+            placeholder="enter folder name"
+            variant="filled"
+            styles={{
+              input: {
+                backgroundColor: colors.background3,
+                color: colors.text,
+                borderColor: colors.primary,
+              },
+            }}
+          />
+          <Group justify="center">
+            <Button
+              variant="outline"
+              my={10}
+              size="md"
+              color={colors.primary}
+              onClick={close}
+            >
+              Cancel
+            </Button>
+            <Button my={10} size="md" color={colors.primary}>
+              Create
+            </Button>
+          </Group>
+        </Modal>
+      </Stack>
 
       <div
         style={{
@@ -85,54 +139,7 @@ const Header = () => {
         }}
         className="h-[1px] w-full"
       ></div>
-      <Modal
-        opened={opened}
-        centered
-        onClose={close}
-        withCloseButton={false}
-        closeOnClickOutside={false}
-        title="Folder Name"
-        styles={{
-          title: {
-            color: colors.text,
-          },
-          content: {
-            backgroundColor: colors.background1,
-          },
-          header: {
-            backgroundColor: colors.background1,
-          },
-        }}
-      >
-        <TextInput
-          my={10}
-          c={colors.text}
-          placeholder="enter folder name"
-          variant="filled"
-          styles={{
-            input: {
-              backgroundColor: colors.background3,
-              color: colors.text,
-              borderColor: colors.primary,
-            },
-          }}
-        />
-        <Group justify="center">
-          <Button
-            variant="outline"
-            my={10}
-            size="md"
-            color={colors.primary}
-            onClick={close}
-          >
-            Cancel
-          </Button>
-          <Button my={10} size="md" color={colors.primary}>
-            Create
-          </Button>
-        </Group>
-      </Modal>
-    </Stack>
+    </>
   );
 };
 
