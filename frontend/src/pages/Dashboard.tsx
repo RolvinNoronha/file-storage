@@ -1,10 +1,11 @@
-import { Button, Group, Input, Menu, Stack } from "@mantine/core";
+import { Button, Group, Input, Menu, Stack, Tabs } from "@mantine/core";
 import { useAppTheme } from "../context/ThemeContext";
 import { IoIosSearch } from "react-icons/io";
-import { LuFilter } from "react-icons/lu";
+import { LuFile, LuFilter, LuFolder } from "react-icons/lu";
 import Header from "../components/Header";
 import Layout from "../components/Layout";
-import FilesAndFolders from "../components/FIlesAndFolders";
+import Folders from "../components/Folders";
+import Files from "../components/Files";
 
 const Dashboard = () => {
   const { colors } = useAppTheme();
@@ -83,7 +84,50 @@ const Dashboard = () => {
             </Menu.Dropdown>
           </Menu>
         </Group>
-        <FilesAndFolders />
+
+        <Tabs
+          styles={{
+            tab: {
+              display: "flex",
+              justifyContent: "center",
+              color: colors.text,
+              fontWeight: "bold",
+            },
+            tabLabel: {
+              flex: 0,
+            },
+          }}
+          h={"100%"}
+          color={colors.primary}
+          defaultValue="files"
+        >
+          <Tabs.List>
+            <Tabs.Tab
+              className="tab-button"
+              w={"50%"}
+              value="files"
+              leftSection={<LuFile size={18} />}
+            >
+              Files
+            </Tabs.Tab>
+            <Tabs.Tab
+              className="tab-button"
+              w={"50%"}
+              value="folders"
+              leftSection={<LuFolder size={18} />}
+            >
+              Folders
+            </Tabs.Tab>
+          </Tabs.List>
+
+          <Tabs.Panel h={"100%"} value="files">
+            <Files />
+          </Tabs.Panel>
+
+          <Tabs.Panel h={"100%"} value="folders">
+            <Folders />
+          </Tabs.Panel>
+        </Tabs>
       </Stack>
     </Layout>
   );

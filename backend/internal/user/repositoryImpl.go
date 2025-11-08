@@ -8,22 +8,22 @@ import (
 )
 
 type repositoryImpl struct {
-	db *gorm.DB
+	ps *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) Repository {
-	return &repositoryImpl{db: db}
+func NewRepository(ps *gorm.DB) Repository {
+	return &repositoryImpl{ps: ps}
 }
 
 func (r *repositoryImpl) CreateUser(user models.User) error {
-	result := r.db.Create(&user)
+	result := r.ps.Create(&user)
 
 	return result.Error
 }
 
 func (r *repositoryImpl) GetUserByUsername(username string) (*models.User, error) {
 	var user models.User
-	tx := r.db.Where("username = ?", username)
+	tx := r.ps.Where("username = ?", username)
 	result := tx.First(&user)
 
 	if result.Error != nil {

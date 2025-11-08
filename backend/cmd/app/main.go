@@ -12,17 +12,16 @@ import (
 
 func main() {
 	env.InitializeEnv()
-	db, err := db.InitializeDb()
+	ps := db.InitializePostgres()
+	// es := db.InitializeElasticSearch()
 	client := aws.InitializeAws()
-
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	port := os.Getenv("PORT")
 	cfg := config{
-		addr:   fmt.Sprintf(":%s", port),
-		db:     db,
+		addr: fmt.Sprintf(":%s", port),
+		ps:   ps,
+		// es:     es,
+		es:     nil,
 		client: client,
 	}
 

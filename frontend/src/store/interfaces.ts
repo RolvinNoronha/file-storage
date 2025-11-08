@@ -5,6 +5,7 @@ export interface Response {
 }
 
 export interface FileType {
+  id: number;
   name: string;
   path: string;
   type: string;
@@ -20,6 +21,7 @@ export interface FileUrlType {
 }
 
 export interface FolderType {
+  id: number;
   name: string;
   userId: number;
   createdAt: Date;

@@ -10,20 +10,31 @@ import "@mantine/notifications/styles.css";
 import AppRoutes from "./routes/AppRoutes.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { Notifications } from "@mantine/notifications";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const theme = createTheme({
-  fontFamily: "Inter, sans-serif",
-});
+const Main = () => {
+  const theme = createTheme({
+    fontFamily: "Inter, sans-serif",
+  });
+
+  const queryClient = new QueryClient();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <MantineProvider theme={theme}>
+        <Notifications />
+        <AppRoutes />
+      </MantineProvider>
+    </QueryClientProvider>
+  );
+};
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
-      <MantineProvider theme={theme}>
-        <Notifications />
-        <ThemeProvider>
-          <AppRoutes />
-        </ThemeProvider>
-      </MantineProvider>
+      <ThemeProvider>
+        <Main />
+      </ThemeProvider>
     </AuthProvider>
   </StrictMode>
 );

@@ -15,8 +15,8 @@ const AppRoutes = () => {
         {
           element: <ProtectedRoutes />,
           children: [
-            { path: "/files", element: <Dashboard /> },
-            { path: "/files/*", element: <Dashboard /> },
+            { path: "/dashboard", element: <Dashboard /> },
+            { path: "/dashboard/*", element: <Dashboard /> },
           ],
         },
       ],

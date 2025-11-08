@@ -6,3 +6,7 @@
 ::before {
   box-sizing: border-box;
 }
+
+.tab-button:hover {
+  background-color: initial !important;
+}

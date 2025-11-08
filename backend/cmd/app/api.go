@@ -7,12 +7,14 @@ import (
 
 	"github.com/RolvinNoronha/fileupload-backend/internal/routes"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/elastic/go-elasticsearch/v9"
 	"gorm.io/gorm"
 )
 
 type config struct {
 	addr   string
-	db     *gorm.DB
+	ps     *gorm.DB
+	es     *elasticsearch.Client
 	client *s3.Client
 }
 
@@ -22,7 +24,7 @@ type application struct {
 
 func (app *application) mount() http.Handler {
 
-	router := routes.NewRouter(app.config.db, app.config.client)
+	router := routes.NewRouter(app.config.ps, app.config.client)
 	return router
 
 	/*

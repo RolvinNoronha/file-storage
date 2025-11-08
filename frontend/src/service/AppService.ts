@@ -25,7 +25,7 @@ interface GetFolderResponse extends Response {
   };
 }
 
-const baseApiUrlv1 = import.meta.env.API_URL_V1;
+const baseApiUrlv1 = import.meta.env.VITE_PUBLIC_API_URL_V1;
 
 class AppServiceClass {
   private static instance: AppServiceClass;
@@ -73,6 +73,8 @@ class AppServiceClass {
       }
     }
 
+    console.log(reqOptions);
+
     try {
       const response = await axios.request(reqOptions);
       return response.data;
@@ -107,7 +109,7 @@ class AppServiceClass {
     );
   };
 
-  getFiles = async (folderId?: number) => {
+  getFiles = async (folderId?: string) => {
     return this.request<GetFilesResponse>(
       !folderId ? "/file/files" : `/file/files/${folderId}`,
       null,
@@ -120,7 +122,7 @@ class AppServiceClass {
     return this.request<Response>("/file/create", null, null, "POST", formData);
   };
 
-  getFolders = async (folderId?: number) => {
+  getFolders = async (folderId?: string) => {
     return this.request<GetFolderResponse>(
       !folderId ? "/folder/folders" : `/folder/folders/${folderId}`,
       null,

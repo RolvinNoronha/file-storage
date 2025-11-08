@@ -12,14 +12,14 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewRouter(db *gorm.DB, client *s3.Client) http.Handler {
+func NewRouter(ps *gorm.DB, client *s3.Client) http.Handler {
 	g := gin.Default()
 
 	v1 := g.Group("/api/v1")
 
 	userRoutes := v1.Group("/user")
 	{
-		userRepo := user.NewRepository(db)
+		userRepo := user.NewRepository(ps)
 		userService := user.NewService(userRepo)
 		userHandler := user.NewHandler(userService)
 
@@ -33,7 +33,7 @@ func NewRouter(db *gorm.DB, client *s3.Client) http.Handler {
 	fileRoutes := v1.Group("/file")
 	fileRoutes.Use(middleware.AuthMiddleWare())
 	{
-		fileRepo := file.NewRepository(db)
+		fileRepo := file.NewRepository(ps)
 		fileService := file.NewService(fileRepo, client)
 		fileHandler := file.NewHandler(fileService)
 
@@ -46,7 +46,7 @@ func NewRouter(db *gorm.DB, client *s3.Client) http.Handler {
 	folderRoutes := v1.Group("/folder")
 	folderRoutes.Use(middleware.AuthMiddleWare())
 	{
-		folderRepo := folder.NewRepository(db)
+		folderRepo := folder.NewRepository(ps)
 		folderService := folder.NewService(folderRepo)
 		folderHandler := folder.NewHandler(folderService)
 
