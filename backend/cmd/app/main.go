@@ -13,15 +13,14 @@ import (
 func main() {
 	env.InitializeEnv()
 	ps := db.InitializePostgres()
-	// es := db.InitializeElasticSearch()
+	es := db.InitializeElasticSearch()
 	client := aws.InitializeAws()
 
 	port := os.Getenv("PORT")
 	cfg := config{
-		addr: fmt.Sprintf(":%s", port),
-		ps:   ps,
-		// es:     es,
-		es:     nil,
+		addr:   fmt.Sprintf(":%s", port),
+		ps:     ps,
+		es:     es,
 		client: client,
 	}
 

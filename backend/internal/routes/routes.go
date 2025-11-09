@@ -8,11 +8,12 @@ import (
 	middleware "github.com/RolvinNoronha/fileupload-backend/internal/middlewares"
 	"github.com/RolvinNoronha/fileupload-backend/internal/user"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/elastic/go-elasticsearch/v9"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func NewRouter(ps *gorm.DB, client *s3.Client) http.Handler {
+func NewRouter(ps *gorm.DB, es *elasticsearch.Client, s3 *s3.Client) http.Handler {
 	g := gin.Default()
 
 	v1 := g.Group("/api/v1")
@@ -33,14 +34,15 @@ func NewRouter(ps *gorm.DB, client *s3.Client) http.Handler {
 	fileRoutes := v1.Group("/file")
 	fileRoutes.Use(middleware.AuthMiddleWare())
 	{
-		fileRepo := file.NewRepository(ps)
-		fileService := file.NewService(fileRepo, client)
+		fileRepo := file.NewRepository(ps, es)
+		fileService := file.NewService(fileRepo, s3)
 		fileHandler := file.NewHandler(fileService)
 
 		fileRoutes.POST("/create", fileHandler.CreateFile)
 		fileRoutes.GET("/files", fileHandler.GetFileByUserID)
 		fileRoutes.GET("/files/:folderId", fileHandler.GetFileByUserIDFolderID)
 		fileRoutes.GET("/url/:fileId", fileHandler.GetFileUrl)
+		fileRoutes.GET("/search")
 	}
 
 	folderRoutes := v1.Group("/folder")

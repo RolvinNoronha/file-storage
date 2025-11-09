@@ -24,7 +24,7 @@ type application struct {
 
 func (app *application) mount() http.Handler {
 
-	router := routes.NewRouter(app.config.ps, app.config.client)
+	router := routes.NewRouter(app.config.ps, app.config.es, app.config.client)
 	return router
 
 	/*

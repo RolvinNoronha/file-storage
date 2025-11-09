@@ -189,3 +189,33 @@ func (h *Handler) GetFileUrl(c *gin.Context) {
 	res.Data = fileUrl
 	c.JSON(http.StatusOK, res)
 }
+
+func (h *Handler) SearchFilesHandler(c *gin.Context) {
+
+	var res models.APIResponse
+	searchTerm := c.DefaultQuery("q", "")
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(c.DefaultQuery("size", "10"))
+
+	if page < 1 {
+		page = 1
+	}
+	if size < 1 || size > 100 {
+		size = 10
+	}
+
+	searchResult, files, err := h.service.Search(searchTerm, page, size)
+
+	if err != nil {
+		res.Message = err.Message
+		res.Success = false
+		c.JSON(err.StatusCode, res)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"total": searchResult.Hits.Total.Value,
+		"page":  page,
+		"size":  size,
+		"data":  files,
+	})
+}

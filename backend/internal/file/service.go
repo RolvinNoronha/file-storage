@@ -2,6 +2,8 @@ package file
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -46,10 +48,18 @@ func (s *Service) CreateFile(file multipart.File, fileHeader *multipart.FileHead
 
 	file.Seek(0, io.SeekStart)
 
+	var path string
+	if folderId != nil {
+		path = fmt.Sprintf("user-files/%d/%d/%s", userId, *folderId, fileHeader.Filename)
+	} else {
+		// If no folderId is provided, upload to a default folder
+		path = fmt.Sprintf("user-files/%d/%s", userId, fileHeader.Filename)
+	}
+
 	// upload to s3
 	_, err = s.client.PutObject(context.Background(), &s3.PutObjectInput{
 		Bucket:            aws.String(s.bucketName),
-		Key:               aws.String(fileHeader.Filename),
+		Key:               aws.String(path),
 		ChecksumAlgorithm: types.ChecksumAlgorithmCrc32,
 		Body:              file,
 		ContentType:       aws.String(contentType),
@@ -65,6 +75,7 @@ func (s *Service) CreateFile(file multipart.File, fileHeader *multipart.FileHead
 	// create db entry
 	dbFile := models.File{
 		UserID:        userId,
+		FilePath:      path,
 		Name:          fileHeader.Filename,
 		FileSize:      uint(fileHeader.Size),
 		FileType:      contentType,
@@ -210,4 +221,71 @@ func (s *Service) GetFileUrl(fileId uint) (*models.FileUrlDTO, *models.ServiceEr
 	}
 
 	return fileUrl, nil
+}
+
+func (s *Service) Search(searchTerm string, page int, size int) (*models.SearchResult, []models.FileDocument, *models.ServiceError) {
+
+	// Calculate 'from' for ES pagination
+	from := (page - 1) * size
+
+	// 2. Build the Elasticsearch Query
+	var query map[string]interface{}
+	if searchTerm == "" {
+		// Match all if no search term is provided
+		query = map[string]interface{}{
+			"query": map[string]interface{}{
+				"match_all": map[string]interface{}{},
+			},
+		}
+	} else {
+		// Use a 'multi_match' query to search multiple fields
+		query = map[string]interface{}{
+			"query": map[string]interface{}{
+				"multi_match": map[string]interface{}{
+					"query":  searchTerm,
+					"fields": []string{"name", "file_type", "username", "folder_name"},
+				},
+			},
+		}
+	}
+
+	// 3. Add pagination and sorting
+	query["from"] = from
+	query["size"] = size
+	query["sort"] = []interface{}{
+		map[string]interface{}{
+			"created_at": map[string]interface{}{
+				"order": "desc",
+			},
+		},
+	}
+
+	// Marshal the query map to a JSON string
+	queryJSON, err := json.Marshal(query)
+	if err != nil {
+		return nil, nil, &models.ServiceError{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "Could not build query",
+		}
+	}
+
+	res, err := s.repo.Search(queryJSON)
+
+	// 5. Parse the response
+	var searchResult models.SearchResult
+	if err := json.NewDecoder(res.Body).Decode(&searchResult); err != nil {
+		return nil, nil, &models.ServiceError{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "Could not parse search results",
+		}
+	}
+
+	// 6. Format and return the paginated response
+	// Extract the documents from the 'hits'
+	files := make([]models.FileDocument, len(searchResult.Hits.Hits))
+	for i, hit := range searchResult.Hits.Hits {
+		files[i] = hit.Source
+	}
+
+	return &searchResult, files, nil
 }
