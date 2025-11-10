@@ -42,7 +42,7 @@ func NewRouter(ps *gorm.DB, es *elasticsearch.Client, s3 *s3.Client) http.Handle
 		fileRoutes.GET("/files", fileHandler.GetFileByUserID)
 		fileRoutes.GET("/files/:folderId", fileHandler.GetFileByUserIDFolderID)
 		fileRoutes.GET("/url/:fileId", fileHandler.GetFileUrl)
-		fileRoutes.GET("/search")
+		fileRoutes.GET("/search", fileHandler.SearchFilesHandler)
 	}
 
 	folderRoutes := v1.Group("/folder")

@@ -270,13 +270,20 @@ func (s *Service) Search(searchTerm string, page int, size int) (*models.SearchR
 	}
 
 	res, err := s.repo.Search(queryJSON)
+	if err != nil {
+		return nil, nil, &models.ServiceError{
+			StatusCode: http.StatusInternalServerError,
+			Message:    err.Error(),
+		}
+	}
+	defer res.Body.Close()
 
 	// 5. Parse the response
 	var searchResult models.SearchResult
 	if err := json.NewDecoder(res.Body).Decode(&searchResult); err != nil {
 		return nil, nil, &models.ServiceError{
 			StatusCode: http.StatusInternalServerError,
-			Message:    "Could not parse search results",
+			Message:    fmt.Sprintf("Could not parse search results: %s", err.Error()),
 		}
 	}
 

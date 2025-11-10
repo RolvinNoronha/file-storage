@@ -280,7 +280,7 @@ func (r *repositoryImpl) Search(queryJSON []byte) (*esapi.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	// defer res.Body.Close()
 
 	if res.IsError() {
 		return nil, errors.New(res.String())
