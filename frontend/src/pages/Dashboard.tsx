@@ -1,134 +1,78 @@
-import { Button, Group, Input, Menu, Stack, Tabs } from "@mantine/core";
-import { useAppTheme } from "../context/ThemeContext";
-import { IoIosSearch } from "react-icons/io";
-import { LuFile, LuFilter, LuFolder } from "react-icons/lu";
+import { Search, Filter, File, Folder } from "lucide-react";
 import Header from "../components/Header";
 import Layout from "../components/Layout";
 import Folders from "../components/Folders";
 import Files from "../components/Files";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Dashboard = () => {
-  const { colors } = useAppTheme();
-
   return (
     <Layout header={<Header />}>
-      <Stack mt={10} h={"94vh"} w={"100vw"}>
-        <Group w={"100%"} justify="center">
-          <Input
-            w={"60%"}
-            size="lg"
-            variant="filled"
-            placeholder="Search Files"
-            styles={{
-              input: {
-                backgroundColor: colors.background2,
-                color: colors.text,
-                borderColor: colors.primary,
-              },
-            }}
-            rightSection={<IoIosSearch size={30} />}
-          />
-          <Menu shadow="md" width={200}>
-            <Menu.Target>
+      <div className="mt-2.5 h-[94vh] w-screen flex flex-col gap-4">
+        <div className="w-full flex flex-row justify-center gap-4 px-4">
+          <div className="relative w-[60%]">
+            <Input
+              className="w-full h-12 text-lg bg-card border-primary pr-12"
+              placeholder="Search Files"
+            />
+            <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={24} />
+          </div>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
-                size="lg"
-                rightSection={<LuFilter />}
                 variant="outline"
-                color={colors.primary}
+                size="lg"
+                className="h-12 border-primary text-primary hover:text-primary"
               >
                 Filter
+                <Filter className="ml-2 h-4 w-4" />
               </Button>
-            </Menu.Target>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuItem>Alphabetically (A-Z)</DropdownMenuItem>
+              <DropdownMenuItem>Alphabetically (Z-A)</DropdownMenuItem>
+              <DropdownMenuItem>Created At (asc)</DropdownMenuItem>
+              <DropdownMenuItem>Created At (desc)</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-            <Menu.Dropdown bg={colors.background2} bd={0}>
-              <Menu.Item
-                styles={{
-                  item: {
-                    backgroundColor: colors.background2,
-                    color: colors.text,
-                  },
-                }}
-              >
-                {"Alphabetically (A-Z)"}
-              </Menu.Item>
-              <Menu.Item
-                styles={{
-                  item: {
-                    backgroundColor: colors.background2,
-                    color: colors.text,
-                  },
-                }}
-              >
-                {"Alphabetically (Z-A)"}
-              </Menu.Item>
-              <Menu.Item
-                styles={{
-                  item: {
-                    backgroundColor: colors.background2,
-                    color: colors.text,
-                  },
-                }}
-              >
-                {"Created At (asc)"}
-              </Menu.Item>
-              <Menu.Item
-                styles={{
-                  item: {
-                    backgroundColor: colors.background2,
-                    color: colors.text,
-                  },
-                }}
-              >
-                {"Created At (desc)"}
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        </Group>
-
-        <Tabs
-          styles={{
-            tab: {
-              display: "flex",
-              justifyContent: "center",
-              color: colors.text,
-              fontWeight: "bold",
-            },
-            tabLabel: {
-              flex: 0,
-            },
-          }}
-          h={"100%"}
-          color={colors.primary}
-          defaultValue="files"
-        >
-          <Tabs.List>
-            <Tabs.Tab
-              className="tab-button"
-              w={"50%"}
-              value="files"
-              leftSection={<LuFile size={18} />}
+        <Tabs defaultValue="files" className="w-full h-full">
+          <TabsList className="w-full flex justify-center bg-transparent border-b rounded-none h-auto p-0">
+            <TabsTrigger 
+              value="files" 
+              className="flex-1 py-3 font-bold flex items-center justify-center gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none bg-transparent"
             >
+              <File size={18} />
               Files
-            </Tabs.Tab>
-            <Tabs.Tab
-              className="tab-button"
-              w={"50%"}
-              value="folders"
-              leftSection={<LuFolder size={18} />}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="folders" 
+              className="flex-1 py-3 font-bold flex items-center justify-center gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none bg-transparent"
             >
+              <Folder size={18} />
               Folders
-            </Tabs.Tab>
-          </Tabs.List>
+            </TabsTrigger>
+          </TabsList>
 
-          <Tabs.Panel h={"100%"} value="files">
+          <TabsContent value="files" className="h-full mt-0">
             <Files />
-          </Tabs.Panel>
+          </TabsContent>
 
-          <Tabs.Panel h={"100%"} value="folders">
+          <TabsContent value="folders" className="h-full mt-0">
             <Folders />
-          </Tabs.Panel>
+          </TabsContent>
         </Tabs>
-      </Stack>
+      </div>
     </Layout>
   );
 };

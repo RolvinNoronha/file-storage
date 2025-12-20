@@ -1,31 +1,33 @@
-import { Button, Group, Modal, Stack, TextInput, Title } from "@mantine/core";
 import { Link } from "react-router";
 import { useAppTheme } from "../context/ThemeContext";
-import { MdDarkMode, MdLightMode } from "react-icons/md";
+import { Moon, Sun, LogOut } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { useDisclosure } from "@mantine/hooks";
+import { useState } from "react";
 import filesIcons from "../assets/files-icon.png";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 const Header = () => {
   const { isAuthenticated, logout } = useAuth();
-  const { theme, toggleTheme, colors } = useAppTheme();
-  const [opened, { open, close }] = useDisclosure(false);
+  const { theme, toggleTheme } = useAppTheme();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <>
-      <Stack
-        h={"6vh"}
-        justify="center"
-        className="sticky top-0 bg-transparent backdrop-blur-3xl z-50"
-      >
-        <Group px={"md"} justify="space-between">
-          <Group>
-            <img className="h-8 w-8" src={filesIcons} />
-            <Title c={colors.text} mt={0}>
-              File Uploader
-            </Title>
-          </Group>
-          <Group>
+      <div className="h-[6vh] flex flex-col justify-center sticky top-0 bg-background/80 backdrop-blur-3xl z-50 px-4">
+        <div className="flex flex-row justify-between items-center w-full">
+          <div className="flex items-center gap-2">
+            <img className="h-8 w-8" src={filesIcons} alt="File Icon" />
+            <h1 className="text-2xl font-bold">File Uploader</h1>
+          </div>
+          <div className="flex items-center gap-4">
             {isAuthenticated ? (
               <>
                 <div className="flex items-center justify-center">
@@ -38,107 +40,71 @@ const Header = () => {
                   />
                   <label
                     htmlFor="fileInput"
-                    className="cursor-pointer text-white font-semibold px-6 py-2 rounded-sm focus:outline-none focus:ring-2"
-                    style={{ background: colors.primary }}
+                    className="cursor-pointer bg-primary text-primary-foreground font-medium px-4 py-[6px] rounded-md hover:opacity-90 transition-opacity"
                   >
                     Choose File
                   </label>
                 </div>
-                <Button size="md" color={colors.primary} onClick={open}>
+                <Button size="default" onClick={() => setIsModalOpen(true)}>
                   Add Folder
                 </Button>
                 <Button
-                  size="md"
+                  size="default"
                   variant="outline"
-                  color={"red"}
+                  className="text-destructive border-destructive hover:text-destructive-foreground"
                   onClick={logout}
+                  // onClick={() => {}}
                 >
+                  <LogOut className="mr-2 h-4 w-4" />
                   Log Out
                 </Button>
               </>
             ) : (
               <Link to={"/auth"}>
-                <Button size="md" color={colors.primary}>
-                  Get Started
-                </Button>
+                <Button size="default">Get Started</Button>
               </Link>
             )}
-            {theme === "dark" ? (
-              <MdDarkMode
-                color={colors.text}
-                size={30}
-                className="hover:cursor-pointer"
-                onClick={toggleTheme}
-              />
-            ) : (
-              <MdLightMode
-                color={colors.text}
-                size={30}
-                className="hover:cursor-pointer"
-                onClick={toggleTheme}
-              />
-            )}
-          </Group>
-        </Group>
-
-        <Modal
-          opened={opened}
-          centered
-          onClose={close}
-          withCloseButton={false}
-          closeOnClickOutside={false}
-          title="Folder Name"
-          styles={{
-            title: {
-              color: colors.text,
-            },
-            content: {
-              backgroundColor: colors.background1,
-            },
-            header: {
-              backgroundColor: colors.background1,
-            },
-          }}
-        >
-          <TextInput
-            my={10}
-            c={colors.text}
-            placeholder="enter folder name"
-            variant="filled"
-            styles={{
-              input: {
-                backgroundColor: colors.background3,
-                color: colors.text,
-                borderColor: colors.primary,
-              },
-            }}
-          />
-          <Group justify="center">
             <Button
-              variant="outline"
-              my={10}
-              size="md"
-              color={colors.primary}
-              onClick={close}
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-full"
             >
-              Cancel
+              {theme === "dark" ? (
+                <Moon className="h-[1.5rem] w-[1.5rem]" />
+              ) : (
+                <Sun className="h-[1.5rem] w-[1.5rem]" />
+              )}
             </Button>
-            <Button my={10} size="md" color={colors.primary}>
-              Create
-            </Button>
-          </Group>
-        </Modal>
-      </Stack>
+          </div>
+        </div>
 
-      <div
-        style={{
-          backgroundColor:
-            theme === "light"
-              ? "rgba(0, 0, 0, 0.2)"
-              : "rgba(255, 255, 255, 0.2)",
-        }}
-        className="h-[1px] w-full"
-      ></div>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Folder Name</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <Input
+                placeholder="Enter folder name"
+                className="col-span-3 bg-muted border-primary"
+              />
+            </div>
+            <DialogFooter className="flex justify-center sm:justify-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsModalOpen(false)}
+                className="border-primary text-primary"
+              >
+                Cancel
+              </Button>
+              <Button onClick={() => setIsModalOpen(false)}>Create</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="h-[1px] w-full bg-border"></div>
     </>
   );
 };

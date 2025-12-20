@@ -1,5 +1,4 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import COLORS from "../constants/colors";
 
 type ThemeType = "light" | "dark";
 type ThemeContextType = {
@@ -15,6 +14,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     loadSavedTheme();
   }, []);
+
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
 
   const loadSavedTheme = async () => {
     try {
@@ -55,8 +62,5 @@ export const useAppTheme = () => {
     );
   }
 
-  const { theme, toggleTheme } = themeContext;
-  const colors = COLORS[theme];
-
-  return { colors, theme, toggleTheme };
+  return themeContext;
 };

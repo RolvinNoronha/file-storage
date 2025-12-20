@@ -1,5 +1,4 @@
 import React from "react";
-import { useAppTheme } from "../context/ThemeContext";
 
 const Layout = ({
   header,
@@ -8,13 +7,8 @@ const Layout = ({
   header: React.ReactNode;
   children: React.ReactNode;
 }) => {
-  const { colors } = useAppTheme();
-
   return (
-    <div
-      className="h-screen w-screen overflow-auto transition-colors ease-out duration-100"
-      style={{ backgroundColor: colors.background1 }}
-    >
+    <div className="h-screen w-screen overflow-auto transition-colors ease-out duration-100 bg-background text-foreground">
       {header}
       {children}
     </div>
