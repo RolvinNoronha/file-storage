@@ -1,3 +1,4 @@
+import AppService from "@/service/AppService";
 import {
   createContext,
   useContext,
@@ -10,7 +11,7 @@ type AuthContextType = {
   authToken: string | null | undefined;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (token: string) => void;
+  login: (userName: string, password: string) => void;
   logout: () => void;
 };
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -46,14 +47,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   }, []);
 
-  const login = (token: string) => {
+  const login = async (userName: string, password: string) => {
     // document.cookie = `jwt_token=${token}; path=/; secure; samesite=strict`;
-    setAuthToken(token);
-    setIsAuthenticated(true);
+    try {
+      await AppService.login(userName, password);
+      setIsAuthenticated(true);
+    } catch (error) {
+      throw error;
+    }
   };
 
   const logout = () => {
-    // document.cookie = "jwt_token=; path=/; max-age=-1";
+    document.cookie = "jwt_token=; path=/; max-age=-1";
     setAuthToken(null);
     setIsAuthenticated(false);
   };

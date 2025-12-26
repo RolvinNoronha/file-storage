@@ -2,6 +2,7 @@ export interface Response {
   data: any;
   message: string;
   error: any;
+  success: boolean;
 }
 
 export interface FileType {
@@ -33,3 +34,38 @@ export interface User {
 }
 
 export type RequestMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELTETE";
+
+export interface InitiateUploadRequest {
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  folderId?: number;
+}
+
+export interface PresignedPart {
+  partNumber: number;
+  url: string;
+}
+
+export interface InitiateUploadResponse extends Response {
+  data: {
+    uploadId: string;
+    key: string;
+    parts: PresignedPart[];
+  };
+}
+
+export interface CompletedPart {
+  partNumber: number;
+  etag: string;
+}
+
+export interface CompleteUploadRequest {
+  uploadId: string;
+  key: string;
+  parts: CompletedPart[];
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  folderId?: number;
+}

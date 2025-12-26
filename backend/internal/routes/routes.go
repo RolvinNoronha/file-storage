@@ -39,6 +39,8 @@ func NewRouter(ps *gorm.DB, es *elasticsearch.Client, s3 *s3.Client) http.Handle
 		fileHandler := file.NewHandler(fileService)
 
 		fileRoutes.POST("/create", fileHandler.CreateFile)
+		fileRoutes.POST("/upload/init", fileHandler.InitiateMultipartUpload)
+		fileRoutes.POST("/upload/complete", fileHandler.CompleteMultipartUpload)
 		fileRoutes.GET("/files", fileHandler.GetFileByUserID)
 		fileRoutes.GET("/files/:folderId", fileHandler.GetFileByUserIDFolderID)
 		fileRoutes.GET("/url/:fileId", fileHandler.GetFileUrl)

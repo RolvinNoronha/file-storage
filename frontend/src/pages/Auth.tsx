@@ -7,30 +7,47 @@ import { Label } from "@/components/ui/label";
 import AppService from "../service/AppService";
 import Header from "../components/Header";
 import Layout from "../components/Layout";
+import { useAuth } from "@/context/AuthContext";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [signin, setSignin] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [userName, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
   const handleLogin = async () => {
+    setIsLoading(true);
     try {
-      await AppService.login(userName, password);
+      login(userName, password);
       toast.success("Login successful");
       navigate("/files");
     } catch (error) {
       console.error("Failed to login: ", error);
       toast.error("Login failed. Please check your credentials.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSignIn = () => {
-    toast.success("Successfully created account", {
-      description: "Please login to your account to continue",
-    });
-    setSignin(true);
+  const handleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      await AppService.register(userName, password);
+      toast.success("Successfully created account", {
+        description: "Please login to your account to continue",
+      });
+      setSignin(true);
+      setUserName("");
+      setPassword("");
+    } catch (error) {
+      console.error("Failed to login: ", error);
+      toast.error("Login failed. Please check your credentials.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -50,6 +67,7 @@ const Auth = () => {
                 className="bg-muted border-primary"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
+                disabled={isLoading}
               />
             </div>
 
@@ -62,16 +80,25 @@ const Auth = () => {
                 className="bg-muted border-primary"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
               />
             </div>
 
             {signin ? (
-              <Button className="w-full h-11 text-lg" onClick={handleLogin}>
-                Login
+              <Button
+                className="w-full h-11 text-lg"
+                onClick={handleLogin}
+                disabled={isLoading}
+              >
+                {isLoading ? "Please wait..." : "Login"}
               </Button>
             ) : (
-              <Button className="w-full h-11 text-lg" onClick={handleSignIn}>
-                Register
+              <Button
+                className="w-full h-11 text-lg"
+                onClick={handleSignIn}
+                disabled={isLoading}
+              >
+                {isLoading ? "Please wait..." : "Register"}
               </Button>
             )}
 

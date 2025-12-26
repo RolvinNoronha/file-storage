@@ -219,3 +219,84 @@ func (h *Handler) SearchFilesHandler(c *gin.Context) {
 		"data":  files,
 	})
 }
+
+func (h *Handler) InitiateMultipartUpload(c *gin.Context) {
+	var req models.InitiateMultipartUploadRequest
+	var res models.APIResponse
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		res.Message = err.Error()
+		res.Success = false
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	userId, exists := c.Get("userId")
+	if !exists {
+		res.Message = "unauthorized request"
+		res.Success = false
+		c.JSON(http.StatusUnauthorized, res)
+		return
+	}
+
+	uidFloat, ok := userId.(float64)
+	if !ok {
+		res.Message = "Invalid userId type"
+		res.Success = false
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	response, serr := h.service.InitiateMultipartUpload(req, uint(uidFloat))
+	if serr != nil {
+		res.Message = serr.Message
+		res.Success = false
+		c.JSON(serr.StatusCode, res)
+		return
+	}
+
+	res.Message = "Successfully initiated upload"
+	res.Success = true
+	res.Data = response
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *Handler) CompleteMultipartUpload(c *gin.Context) {
+	var req models.CompleteMultipartUploadRequest
+	var res models.APIResponse
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		res.Message = err.Error()
+		res.Success = false
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	userId, exists := c.Get("userId")
+	if !exists {
+		res.Message = "unauthorized request"
+		res.Success = false
+		c.JSON(http.StatusUnauthorized, res)
+		return
+	}
+
+	uidFloat, ok := userId.(float64)
+	if !ok {
+		res.Message = "Invalid userId type"
+		res.Success = false
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	serr := h.service.CompleteMultipartUpload(req, uint(uidFloat))
+	if serr != nil {
+		res.Message = serr.Message
+		res.Success = false
+		c.JSON(serr.StatusCode, res)
+		return
+	}
+
+	res.Message = "Successfully completed upload"
+	res.Success = true
+	c.JSON(http.StatusOK, res)
+}

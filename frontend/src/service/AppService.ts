@@ -1,7 +1,10 @@
 import axios, { type AxiosRequestConfig } from "axios";
 import type {
+  CompleteUploadRequest,
   FileType,
   FolderType,
+  InitiateUploadRequest,
+  InitiateUploadResponse,
   RequestMethod,
   Response,
   User,
@@ -30,16 +33,8 @@ const baseApiUrlv1 = import.meta.env.VITE_PUBLIC_API_URL_V1;
 class AppServiceClass {
   private static instance: AppServiceClass;
   private baseUrl: string;
-  private token: string | undefined;
-
-  private getTokenFromCookie() {
-    const cookies = document.cookie.split("; ");
-    const token = cookies.find((cookie) => cookie.startsWith("token="));
-    return token ? token.split("=")[1] : undefined;
-  }
 
   private constructor() {
-    this.token = this.getTokenFromCookie();
     this.baseUrl = baseApiUrlv1;
   }
 
@@ -51,7 +46,6 @@ class AppServiceClass {
     formData?: FormData
   ): Promise<T> {
     const baseHeaders: Record<string, string> = {
-      Authorization: `Bearer ${this.token}`,
       ...(headers || {}),
     };
 
@@ -63,6 +57,7 @@ class AppServiceClass {
       url: `${this.baseUrl}${url}`,
       method: method,
       headers: baseHeaders,
+      withCredentials: true,
     };
 
     if (method !== "GET" && data) {
@@ -138,6 +133,28 @@ class AppServiceClass {
       JSON.stringify({ folderName, folderId }),
       "POST"
     );
+  };
+
+  initiateUpload = async (req: InitiateUploadRequest) => {
+    return this.request<InitiateUploadResponse>(
+      "/file/upload/init",
+      null,
+      JSON.stringify(req),
+      "POST"
+    );
+  };
+
+  completeUpload = async (req: CompleteUploadRequest) => {
+    return this.request<Response>(
+      "/file/upload/complete",
+      null,
+      JSON.stringify(req),
+      "POST"
+    );
+  };
+
+  uploadPart = async (url: string, data: Blob) => {
+    return axios.put(url, data);
   };
 }
 

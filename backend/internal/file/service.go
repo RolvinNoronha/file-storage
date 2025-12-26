@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"sort"
 	"time"
 
 	"github.com/RolvinNoronha/fileupload-backend/pkg/models"
@@ -295,4 +297,119 @@ func (s *Service) Search(searchTerm string, page int, size int) (*models.SearchR
 	}
 
 	return &searchResult, files, nil
+}
+
+func (s *Service) InitiateMultipartUpload(req models.InitiateMultipartUploadRequest, userId uint) (*models.InitiateMultipartUploadResponse, *models.ServiceError) {
+	var path string
+	if req.FolderID != nil {
+		path = fmt.Sprintf("user-files/%d/%d/%s", userId, *req.FolderID, req.FileName)
+	} else {
+		path = fmt.Sprintf("user-files/%d/%s", userId, req.FileName)
+	}
+
+	input := &s3.CreateMultipartUploadInput{
+		Bucket:      aws.String(s.bucketName),
+		Key:         aws.String(path),
+		ContentType: aws.String(req.FileType),
+	}
+
+	resp, err := s.client.CreateMultipartUpload(context.TODO(), input)
+	if err != nil {
+		return nil, &models.ServiceError{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "Failed to initiate multipart upload: " + err.Error(),
+		}
+	}
+
+	uploadId := *resp.UploadId
+	partSize := int64(5 * 1024 * 1024) // 5MB
+	numParts := int(math.Ceil(float64(req.FileSize) / float64(partSize)))
+	if numParts == 0 {
+		numParts = 1
+	}
+
+	var parts []models.PresignedPart
+
+	for i := 1; i <= numParts; i++ {
+		presignedReq, err := s.presignClient.PresignUploadPart(context.TODO(), &s3.UploadPartInput{
+			Bucket:     aws.String(s.bucketName),
+			Key:        aws.String(path),
+			UploadId:   aws.String(uploadId),
+			PartNumber: aws.Int32(int32(i)),
+		}, func(opts *s3.PresignOptions) {
+			opts.Expires = 24 * time.Hour
+		})
+
+		if err != nil {
+			return nil, &models.ServiceError{
+				StatusCode: http.StatusInternalServerError,
+				Message:    "Failed to generate presigned url: " + err.Error(),
+			}
+		}
+
+		parts = append(parts, models.PresignedPart{
+			PartNumber: i,
+			Url:        presignedReq.URL,
+		})
+	}
+
+	return &models.InitiateMultipartUploadResponse{
+		UploadId: uploadId,
+		Key:      path,
+		Parts:    parts,
+	}, nil
+}
+
+func (s *Service) CompleteMultipartUpload(req models.CompleteMultipartUploadRequest, userId uint) *models.ServiceError {
+	var completedParts []types.CompletedPart
+	for _, p := range req.Parts {
+		completedParts = append(completedParts, types.CompletedPart{
+			ETag:       aws.String(p.ETag),
+			PartNumber: aws.Int32(int32(p.PartNumber)),
+		})
+	}
+
+	sort.Slice(completedParts, func(i, j int) bool {
+		return *completedParts[i].PartNumber < *completedParts[j].PartNumber
+	})
+
+	completeInput := &s3.CompleteMultipartUploadInput{
+		Bucket:   aws.String(s.bucketName),
+		Key:      aws.String(req.Key),
+		UploadId: aws.String(req.UploadId),
+		MultipartUpload: &types.CompletedMultipartUpload{
+			Parts: completedParts,
+		},
+	}
+
+	_, err := s.client.CompleteMultipartUpload(context.TODO(), completeInput)
+	if err != nil {
+		return &models.ServiceError{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "Failed to complete multipart upload: " + err.Error(),
+		}
+	}
+
+	// Create DB entry
+	dbFile := models.File{
+		UserID:        userId,
+		FilePath:      req.Key,
+		Path:          req.Key,
+		Name:          req.FileName,
+		FileSize:      req.FileSize,
+		FileType:      req.FileType,
+		FolderID:      req.FolderID,
+		FileUrlExpiry: nil,
+		FileUrl:       "",
+	}
+
+	err = s.repo.CreateFile(dbFile)
+	if err != nil {
+		return &models.ServiceError{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "Failed to save file info to database: " + err.Error(),
+		}
+	}
+
+	return nil
 }

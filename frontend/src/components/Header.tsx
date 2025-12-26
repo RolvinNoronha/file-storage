@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import { useAppTheme } from "../context/ThemeContext";
 import { Moon, Sun, LogOut } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -13,11 +13,116 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import AppService from "@/service/AppService";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import type { CompletedPart } from "@/store/interfaces";
 
 const Header = () => {
   const { isAuthenticated, logout } = useAuth();
   const { theme, toggleTheme } = useAppTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [folderName, setFolderName] = useState("");
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const params = useParams();
+  const queryClient = useQueryClient();
+
+  const getFolderId = () => {
+    const folderIds = params["*"]?.split("/");
+    if (folderIds && folderIds.length > 0) {
+      const id = folderIds[folderIds.length - 1];
+      return id ? parseInt(id) : undefined;
+    }
+    return undefined;
+  };
+
+  const handleCreateFolder = async () => {
+    if (!folderName.trim()) return;
+
+    setIsCreatingFolder(true);
+    const folderId = getFolderId();
+
+    try {
+      await AppService.createFolder(folderName, folderId);
+      toast.success("Folder created successfully");
+      setIsModalOpen(false);
+      setFolderName("");
+      queryClient.invalidateQueries({ queryKey: ["folderId"] });
+    } catch (error) {
+      console.error("Failed to create folder:", error);
+      toast.error("Failed to create folder");
+    } finally {
+      setIsCreatingFolder(false);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const folderId = getFolderId();
+    const toastId = toast.loading("Initiating upload...");
+
+    try {
+      const initRes = await AppService.initiateUpload({
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size,
+        folderId: folderId,
+      });
+
+      if (!initRes.success) {
+        throw new Error(initRes.message);
+      }
+
+      const { uploadId, key, parts } = initRes.data;
+      const completedParts: CompletedPart[] = [];
+      const chunkSize = 5 * 1024 * 1024; // 5MB
+
+      for (const part of parts) {
+        const start = (part.partNumber - 1) * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+        const chunk = file.slice(start, end);
+
+        toast.loading(`Uploading part ${part.partNumber}/${parts.length}...`, {
+          id: toastId,
+        });
+
+        const uploadRes = await AppService.uploadPart(part.url, chunk);
+
+        const etag = uploadRes.headers["etag"];
+        if (!etag) throw new Error(`No ETag for part ${part.partNumber}`);
+
+        completedParts.push({
+          partNumber: part.partNumber,
+          etag: etag,
+        });
+      }
+
+      toast.loading("Finalizing upload...", { id: toastId });
+      const completeRes = await AppService.completeUpload({
+        uploadId,
+        key,
+        parts: completedParts,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        folderId,
+      });
+
+      if (completeRes.success) {
+        toast.success("File uploaded successfully", { id: toastId });
+        queryClient.invalidateQueries({ queryKey: ["files"] });
+      } else {
+        throw new Error(completeRes.message);
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Upload failed", { id: toastId });
+    } finally {
+      e.target.value = "";
+    }
+  };
 
   return (
     <>
@@ -36,7 +141,7 @@ const Header = () => {
                     id="fileInput"
                     className="hidden"
                     accept="*/*"
-                    onChange={() => {}}
+                    onChange={handleFileUpload}
                   />
                   <label
                     htmlFor="fileInput"
@@ -88,6 +193,9 @@ const Header = () => {
               <Input
                 placeholder="Enter folder name"
                 className="col-span-3 bg-muted border-primary"
+                value={folderName}
+                onChange={(e) => setFolderName(e.target.value)}
+                disabled={isCreatingFolder}
               />
             </div>
             <DialogFooter className="flex justify-center sm:justify-center gap-2">
@@ -95,10 +203,13 @@ const Header = () => {
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}
                 className="border-primary text-primary"
+                disabled={isCreatingFolder}
               >
                 Cancel
               </Button>
-              <Button onClick={() => setIsModalOpen(false)}>Create</Button>
+              <Button onClick={handleCreateFolder} disabled={isCreatingFolder}>
+                {isCreatingFolder ? "Creating..." : "Create"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
